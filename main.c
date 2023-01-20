@@ -3,7 +3,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <X11/Xlib.h>
 
 #include "httpget.h"
 
@@ -26,7 +25,6 @@ void usage(char* pn){
 int main(int argc,char** argv){
    buffer * b;
    int fd;
-   XImage * img;
 
    if (argc==4){
       b=httpGet(argv[1],atoi(argv[2]),argv[3]);
