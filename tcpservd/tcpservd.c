@@ -1,5 +1,5 @@
 /* 
- * jblanche (c) 2004-2007
+ * jblanche (c) 
  *
  */
 #include <sys/types.h>
