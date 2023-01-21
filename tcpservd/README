@@ -1,0 +1,160 @@
+What is tcpservd ?
+==============
+
+. tcpservd has been write for testing Cluster or Network, It can be used in HA or 
+  Scalable mode. Can also run in container 
+
+  tcpservd   : server
+  tcpcli: client
+
+. tcpservd is a simple tcp server listen on "tcpservd" port define in /etc/services 
+
+. tcpservd know followings commands 
+  HELP      :   HELP
+  RQST      :	Send request to tcpservd.
+            :	If tcpservd is in BAD STATE: return BAD
+            :	If tcpservd is in GOOD STATE: return RPLY
+         	
+  HOSTNAME  :	Get the hostname of the server
+  BAD       :	Put tcpservd in BAD  STATE (bad state)
+  GOOD      :	Put tcpservd in GOOD STATE (normal)
+  START_LOOP:	Start a loop for performance tests
+  QUIT      :	Quit tcpservd client
+
+. tcpcli is the simple client of tcpservd, tcpservd_cmd connect to the server and send
+  the QUIT command. tcpservd_cmd can be use in the fault monitoring 
+
+How to defining a True Fault Monitor for tcpservd 
+==============================================
+
+. run tcpcli <server_name> in the Probe Program to define the Fault Monitor
+  and test the replies of tcpservd_cmd which has to be the "QUIT" string
+
+Server Options
+==============
+
+The following options are supported
+	-h      Help
+	-d	print debug informations
+	-r	enable local address reuse (SO_REUSEADDR)
+	-k	enable keep connection alive (SO_KEEPALIVE)
+	-b	Return string BAD instead of QUIT to quit client
+	-s	choose /etc/services tcp name
+   
+
+How to add tcpservd in suncluser
+============================
+# clrs create -g tcpservd-rg -t SUNW.gds \
+-p Start_command=/opt/SUNPStcpservd/bin/start \
+-p Stop_command=/opt/SUNPStcpservd/bin/stop \
+-p Probe_command="/opt/SUNPStcpservd/bin/tcpcli localhost" \
+-p Port_list=1971/tcp \
+tcpservd-rs
+
+How to start tcpservd
+=================
+
+start with SO_REUSEADDR and SO_KEEPALIVE flags
+
+  #/opt/SUNPStcpservd/bin/tcpservd -kr
+
+start in debug mode
+
+  #/opt/SUNPStcpservd/bin/tcpservd -dkr
+
+
+What Command How to access tcpservd servers ?
+=========================================
+# telnet <hostname_tcpservd_server> tcpservd 
+  or
+# telnet <hostname_tcpservd_server> <tcpservd_port_number>
+
+  or (if tcpservd client is installed)
+# tcpcli <hostname_tcpservd_server 
+
+What commands are Availaibe in tcpservd servers ?
+=============================================
+
+# telnet <hostname_tcpservd_servers> <tcpservd_port_number>
+>HELP
+Wellcome to tcpservd 1.0_0 online help
+----------------------------
+RQST      :     Send request to tcpservd.
+          :     If tcpservd is in BAD STATE: return BAD
+          :     If tcpservd is in GOOD STATE: return RPLY
+          :
+VERS      :     Get the tcpservd server version
+HOSTNAME  :     Get the hostname where tcpservd run
+BAD       :     Put tcpservd in BAD  STATE (bad state)
+GOOD      :     Put tcpservd in GOOD STATE (normal)
+START_LOOP:     Start a loop for performance tests
+QUIT      :     Quit tcpservd client
+
+Simple example 
+==============
+# getent services tcpservd
+tcpservd                 1971/tcp
+
+# telnet zone1 1971
+Trying 129.157.182.20...
+Connected to zone1
+Escape character is '^]'.
+>VERS
+1.0_0
+>HOSTNAME
+hostname:[zone1]
+>RQST
+RPLY
+>BAD
+Status is BAD
+>RQST
+BAD
+>GOOD
+Status is GOOD
+>START_LOOP
+START_LOOP_WAIT
+END_LOOP: 5 seconds 
+>QUIT
+QUIT
+>Connection to zone1 closed by foreign host.
+
+
+How to test client/server communications with debug
+===================================================
+
+ Run Server side			| Client side with telnet
+----------------------------------------+---------------------------------------------
+ # tcpservd -dkr			|
+ DEB>>SO_REUSEADDR on main socket	|
+ DEB>>SERVER BIND on local port 1971	|
+ 					| # telnet <server_hostname> tcpservd
+ DEB>>[id:1] NEW CLIENT: 		| > 
+ DEB>>[id:1] SO_KEEPALIVE option 	| > 
+					| > ONE_SIMPLE_CMD 
+ DEB>>[id:1] GET_CMD: ONE_SIMPLE_CMD	| ONE_SIMPLE_CMD 
+ 					| >
+                                        | > QUIT 
+ DEB>>[id:1] GET_CMD: QUIT		| QUIT
+ DEB>>[id:1] CLOSE CLIENT connection    | Connection closed by foreign host.
+ DEB>>[id:1]                            | #
+----------------------------------------+---------------------------------------------
+					| Client side with tcpcli 
+----------------------------------------+---------------------------------------------
+					| # tcpcli <server_hostname>
+ DEB>>[id:2] NEW CLIENT:		| QUIT
+ DEB>>[id:2] SO_KEEPALIVE		| # 
+ DEB>>[id:2] GET_CMD: QUIT		|
+ DEB>>[id:2] CLOSE CLIENT connection	|
+ DEB>>[id:2]				|
+----------------------------------------+---------------------------------------------
+
+BUILD
+=====
+
+ # make clean
+ # make
+   
+CONTACT
+=======
+
+Any comments to jerome.blanchet@NetApp.com 
