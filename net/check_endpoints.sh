@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+#set -x
 __RAINBOWPALETTE="1"
 COLOR_ESCAPE="\e"
 if [[ "$IS_MAC" == true ]]; then
