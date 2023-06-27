@@ -1,0 +1,7 @@
+#export KUBECONFIG=/home/user/kubeconfigs/rke1/kube_config_cluster.yml ; echo
+kubectl get nodes # commant 
+kubectl get namespaces
+kubectl get services -n wordpress
+#export KUBECONFIG=/home/user/kubeconfigs/rke2/kube_config_cluster.yml ; echo 
+#kubectl get nodes
+#kubectl get namespaces
