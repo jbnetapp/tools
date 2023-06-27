@@ -1,0 +1,27 @@
+#!/bin/bash
+PROMPT="#"
+TMPEXFILE=/tmp/run.$$
+run_command () {
+ echo -n $PROMPT
+ echo -n " " 
+ read
+ CMD=$1 
+ echo -n $PROMPT
+ echo -n " " 
+ for i in $(seq 1 ${#CMD}); do
+        echo -n "${CMD:i-1:1}"
+        sleep 0.06
+ done
+ echo
+ echo $CMD > $TMPEXFILE
+ chmod +x $TMPEXFILE
+ read
+ $TMPEXFILE
+}
+
+
+run_command "kubectl get nodes" 
+run_command "kubectl get ns" 
+run_command "kubectl get services -n wordpress" 
+
+if [ -f $TMPEXFILE ]; then rm $TMPEXFILE ; fi
