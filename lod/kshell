@@ -1,27 +1,68 @@
 #!/bin/bash
+# Jerome.Blanchet@NetApp.com
+# Simple Shell for Demo
+#
+# set -x
+#
+version=0.1
+
 PROMPT="#"
 TMPEXFILE=/tmp/run.$$
-run_command () {
- echo -n $PROMPT
- echo -n " " 
- read
- CMD=$1 
- echo -n $PROMPT
- echo -n " " 
- for i in $(seq 1 ${#CMD}); do
-        echo -n "${CMD:i-1:1}"
-        sleep 0.06
- done
- echo
- echo $CMD > $TMPEXFILE
- chmod +x $TMPEXFILE
- read
- $TMPEXFILE
+
+[ -z $CMDLSFILE ] && CMDLSFILE=./kshell-listcmd.txt
+
+clean_and_exit(){
+	[ -f $TMPEXFILE ] && rm $TMPEXFILE 
+	exit 0
+}
+
+run_print() {
+ 	CMD=$1
+   	stty -F /dev/tty -echo
+ 	echo -n $PROMPT ; echo -n " "
+ 	for i in $(seq 1 ${#CMD}); do
+        	echo -n "${CMD:i-1:1}"
+		if [ "${CMD:i-1:1}" == " " ] ; then 
+        		sleep 0.06
+		else 
+        		sleep 0.04
+		fi
+ 	done
+ 	echo -n " " ; read -u 1
+ 	echo $CMD > $TMPEXFILE ; chmod +x $TMPEXFILE
+ 	$TMPEXFILE
+   	stty -F /dev/tty echo
+}
+
+run_loop() {
+	echo -n $PROMPT ; echo -n " " 
+	read -u 1 CMD
+	#echo "DEBUG: CMD:[${CMD}]"
+	while [ ! -z "$CMD" ]; do
+		[ "$CMD" == "exit" ] && clean_and_exit
+ 		echo $CMD > $TMPEXFILE; chmod +x $TMPEXFILE
+ 		$TMPEXFILE
+		echo -n $PROMPT ;  echo -n " " 
+ 		read  -u 1 CMD
+ 	done
 }
 
 
-run_command "kubectl get nodes" 
-run_command "kubectl get ns" 
-run_command "kubectl get services -n wordpress" 
+run_command () {
+        run_loop
+ 	CMD=$1
+ 	run_print "$CMD"
+}
 
-if [ -f $TMPEXFILE ]; then rm $TMPEXFILE ; fi
+#
+# MAIN
+#
+
+[ ! -f $CMDLSFILE ] && clean_and_exit 1 
+
+[ -z $cmdindx ] && export cmdindx=1
+
+cat $CMDLSFILE |grep -v "^#" |  while read CMDLS; do
+	run_command "$CMDLS"
+	export cmdindx=$(($cmdindx + 1))
+done
