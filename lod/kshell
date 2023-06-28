@@ -1,15 +1,23 @@
 #!/bin/bash
+#
 # Jerome.Blanchet@NetApp.com
 # Simple Shell for Demo
 #
 # set -x
 #
+# Environment variiable setup
+# KSHELL_CMDLSFILE  : File containing the list of command to be executed during demo
+# KSHELL_INDX       : Command line Index
 version=0.1
 
-PROMPT="#"
-TMPEXFILE=/tmp/run.$$
+BASENAME=`basename $0`
+DIRNAME=`dirname $0`
 
-[ -z $CMDLSFILE ] && CMDLSFILE=./kshell-listcmd.txt
+PROMPT="#"
+TMPEXFILE=/tmp/kshell_run.$$
+TMPINDXFILE=/tmp/kshell_index.conf
+
+[ -z $KSHELL_CMDLSFILE ] && KSHELL_CMDLSFILE=${DIRNAME}/kshell-listcmd.txt
 
 clean_and_exit(){
 	[ -f $TMPEXFILE ] && rm $TMPEXFILE 
@@ -23,14 +31,14 @@ run_print() {
  	for i in $(seq 1 ${#CMD}); do
         	echo -n "${CMD:i-1:1}"
 		if [ "${CMD:i-1:1}" == " " ] ; then 
-        		sleep 0.06
+        		sleep 0.08
 		else 
-        		sleep 0.04
+        		sleep 0.06
 		fi
  	done
- 	echo -n " " ; read -u 1
+ 	echo -n " " ; read -u 1 ; echo
  	echo $CMD > $TMPEXFILE ; chmod +x $TMPEXFILE
- 	$TMPEXFILE
+ 	$TMPEXFILE ; echo
    	stty -F /dev/tty echo
 }
 
@@ -39,9 +47,17 @@ run_loop() {
 	read -u 1 CMD
 	#echo "DEBUG: CMD:[${CMD}]"
 	while [ ! -z "$CMD" ]; do
-		[ "$CMD" == "exit" ] && clean_and_exit
+		[ "$CMD" == "index" ] && CMD="echo $cmd_indx"
+		if [ "$CMD" == "exit" ] ; then 
+			echo "KSHELL_INDX=$cmd_indx" > $TMPINDXFILE
+			clean_and_exit
+		fi
+		if [ "$CMD" == "exit_and_clear_index" ] ; then 
+			[ -f $TMPINDXFILE ] && rm $TMPINDXFILE
+			clean_and_exit
+		fi
  		echo $CMD > $TMPEXFILE; chmod +x $TMPEXFILE
- 		$TMPEXFILE
+ 		$TMPEXFILE ; echo
 		echo -n $PROMPT ;  echo -n " " 
  		read  -u 1 CMD
  	done
@@ -58,11 +74,15 @@ run_command () {
 # MAIN
 #
 
-[ ! -f $CMDLSFILE ] && clean_and_exit 1 
+[ ! -f $KSHELL_CMDLSFILE ] && clean_and_exit "ERROR: KSHELL_CMDLSFILE: $KSHELL_CMDLSFILE no such file"
 
-[ -z $cmdindx ] && export cmdindx=1
+[ -f $TMPINDXFILE ] && source $TMPINDXFILE
+[ -z $KSHELL_INDX ] && KSHELL_INDX=1
 
-cat $CMDLSFILE |grep -v "^#" |  while read CMDLS; do
-	run_command "$CMDLS"
-	export cmdindx=$(($cmdindx + 1))
+cmd_indx=1
+
+cat $KSHELL_CMDLSFILE |grep -v "^#" |  while read CMDLS; do
+	[ $cmd_indx -ge $KSHELL_INDX ] &&  run_command "$CMDLS"
+	cmd_indx=$(($cmd_indx + 1))
 done
+clean_and_exit

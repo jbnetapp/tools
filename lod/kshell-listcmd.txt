@@ -1,7 +1,10 @@
-#export KUBECONFIG=/home/user/kubeconfigs/rke1/kube_config_cluster.yml ; echo
-kubectl get nodes # commant 
+kubectl get nodes 
+kubectl get storageclasses
 kubectl get namespaces
+helm list -n wordpress 
+kubectl get all -n wordpress
+kubectl get pod -n wordpress
 kubectl get services -n wordpress
-#export KUBECONFIG=/home/user/kubeconfigs/rke2/kube_config_cluster.yml ; echo 
-#kubectl get nodes
-#kubectl get namespaces
+kubectl get secrets -n wordpress
+kubectl get pvc -n wordpress
+kubectl get volumesnapshots -n wordpress
