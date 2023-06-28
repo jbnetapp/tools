@@ -21,6 +21,7 @@ TMPINDXFILE=/tmp/kshell_index.conf
 
 clean_and_exit(){
 	[ -f $TMPEXFILE ] && rm $TMPEXFILE 
+	echo $1
 	exit 0
 }
 
