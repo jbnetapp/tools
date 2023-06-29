@@ -6,7 +6,7 @@
 # set -x
 #
 # Environment variiable setup
-# KSHELL_CMDLSFILE  : File containing the list of command to be executed during demo
+# KSHELL_CMDLSTFILE  : File containing the list of command to be executed during demo
 # KSHELL_INDX       : Command line Index
 version=0.1
 
@@ -17,12 +17,11 @@ PROMPT="#"
 TMPEXFILE=/tmp/kshell_run.$$
 TMPINDXFILE=/tmp/kshell_index.conf
 
-[ -z $KSHELL_CMDLSFILE ] && KSHELL_CMDLSFILE=${DIRNAME}/kshell-listcmd.txt
+[ -z $KSHELL_CMDLSTFILE ] && KSHELL_CMDLSTFILE=${DIRNAME}/kshell-listcmd.txt
 
 clean_and_exit(){
 	[ -f $TMPEXFILE ] && rm $TMPEXFILE 
-	echo $1
-	exit 0
+	exit $1 
 }
 
 run_print() {
@@ -49,13 +48,14 @@ run_loop() {
 	#echo "DEBUG: CMD:[${CMD}]"
 	while [ ! -z "$CMD" ]; do
 		[ "$CMD" == "index" ] && CMD="echo $cmd_indx"
+		[ "$CMD" == "next" ] && CMD="head -$cmd_indx $KSHELL_CMDLSTFILE | tail +$cmd_indx"
 		if [ "$CMD" == "exit" ] ; then 
 			echo "KSHELL_INDX=$cmd_indx" > $TMPINDXFILE
-			clean_and_exit
+			clean_and_exit 0
 		fi
-		if [ "$CMD" == "exit_and_clear_index" ] ; then 
+		if [ "$CMD" == "exit_clear_index" ] ; then 
 			[ -f $TMPINDXFILE ] && rm $TMPINDXFILE
-			clean_and_exit
+			clean_and_exit 0
 		fi
  		echo $CMD > $TMPEXFILE; chmod +x $TMPEXFILE
  		$TMPEXFILE ; echo
@@ -75,15 +75,20 @@ run_command () {
 # MAIN
 #
 
-[ ! -f $KSHELL_CMDLSFILE ] && clean_and_exit "ERROR: KSHELL_CMDLSFILE: $KSHELL_CMDLSFILE no such file"
-
+if [ ! -f $KSHELL_CMDLSTFILE ]; then
+	echo "ERROR: KSHELL_CMDLSTFILE: $KSHELL_CMDLSTFILE no such file"
+	clean_and_exit 0 
+fi
 [ -f $TMPINDXFILE ] && source $TMPINDXFILE
 [ -z $KSHELL_INDX ] && KSHELL_INDX=1
 
 cmd_indx=1
 
-cat $KSHELL_CMDLSFILE |grep -v "^#" |  while read CMDLS; do
+while read CMDLS; do
 	[ $cmd_indx -ge $KSHELL_INDX ] &&  run_command "$CMDLS"
 	cmd_indx=$(($cmd_indx + 1))
-done
-clean_and_exit
+done < <(grep -v "^#" $KSHELL_CMDLSTFILE)
+
+[ -f $TMPINDXFILE ] && rm $TMPINDXFILE
+
+clean_and_exit 0
