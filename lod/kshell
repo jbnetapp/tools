@@ -43,17 +43,26 @@ run_print() {
 }
 
 run_loop() {
-	echo -n $PROMPT ; echo -n " " 
+	echo -n $PROMPT ; echo -n " "
 	read -u 1 CMD
 	#echo "DEBUG: CMD:[${CMD}]"
 	while [ ! -z "$CMD" ]; do
 		[ "$CMD" == "index" ] && CMD="echo $cmd_indx"
 		[ "$CMD" == "next" ] && CMD="head -$cmd_indx $KSHELL_CMDLSTFILE | tail +$cmd_indx"
+		[ "$CMD" == "list" ] && CMD="cat $KSHELL_CMDLSTFILE"
+		if [ "$CMD" == "reset-index" ] ; then 
+			cmd_indx=1
+			CMD="echo $cmd_indx"
+		fi
+		if [ "$CMD" == "jump" ] ; then 
+			cmd_indx=$(($cmd_indx + 1))
+			CMD="echo $cmd_indx"
+		fi
 		if [ "$CMD" == "exit" ] ; then 
 			echo "KSHELL_INDX=$cmd_indx" > $TMPINDXFILE
 			clean_and_exit 0
 		fi
-		if [ "$CMD" == "exit_clear_index" ] ; then 
+		if [ "$CMD" == "exit-reset-index" ] ; then
 			[ -f $TMPINDXFILE ] && rm $TMPINDXFILE
 			clean_and_exit 0
 		fi
@@ -62,13 +71,7 @@ run_loop() {
 		echo -n $PROMPT ;  echo -n " " 
  		read  -u 1 CMD
  	done
-}
-
-
-run_command () {
-        run_loop
- 	CMD=$1
- 	run_print "$CMD"
+	return 0 
 }
 
 #
@@ -79,15 +82,17 @@ if [ ! -f $KSHELL_CMDLSTFILE ]; then
 	echo "ERROR: KSHELL_CMDLSTFILE: $KSHELL_CMDLSTFILE no such file"
 	clean_and_exit 0 
 fi
+
 [ -f $TMPINDXFILE ] && source $TMPINDXFILE
 [ -z $KSHELL_INDX ] && KSHELL_INDX=1
+cmd_indx=$KSHELL_INDX
 
-cmd_indx=1
-
-while read CMDLS; do
-	[ $cmd_indx -ge $KSHELL_INDX ] &&  run_command "$CMDLS"
+while [ true ] ; do
+        run_loop
+	CMD=`head -$cmd_indx $KSHELL_CMDLSTFILE | tail +$cmd_indx`
+ 	run_print "$CMD"
 	cmd_indx=$(($cmd_indx + 1))
-done < <(grep -v "^#" $KSHELL_CMDLSTFILE)
+done
 
 [ -f $TMPINDXFILE ] && rm $TMPINDXFILE
 
