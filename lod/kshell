@@ -74,12 +74,33 @@ get_cmdline(){
 		echo -n "$c"
 		((${#c}==0)) && break
 		case "$c" in
+			$'\x1b')
+				read -u 1 -r -s -n1 -t 0.1 ctmp 
+				# Handle ESC sequence
+				if [[ "$ctmp" == "[" ]]; then
+					# Arrow
+					read -u 1 -r -s -n1 -t 0.1 ctmp
+					case "$ctmp" in
+						"A") continue ;;
+						"B") continue ;;
+						"C") continue ;;
+						"D") continue ;;
+					esac
+				fi
+				read -u 1 -r -s -n1 -t 0.1
+				continue;;
 			$'\177')
+				# Handle Backspace 
 				if [ ${#GETCMD} -gt 0 ]; then
 					GETCMD="${GETCMD::-1}"
-					printf "\010\040\010\033[P"          # backspace
+					printf "\010\040\010\033[P"
 				fi
 				continue;;
+			$'\016')
+				# Handle CTRL-N
+				echo; echo -n -e $KSHELL_PROMPT ; echo -n " "
+				continue;;
+					
 		esac
 		GETCMD="${GETCMD}${c}"
 	done
