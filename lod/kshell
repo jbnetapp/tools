@@ -3,21 +3,23 @@
 # Jerome.Blanchet@NetApp.com
 # Simple Shell for Demo
 #
-# set -x
+#set -x
 #
 # Environment variiable setup
 # KSHELL_CMDLSTFILE  : File containing the list of command to be executed during demo
-# KSHELL_INDX       : Command line Index
+#
 version=0.1
 
 BASENAME=`basename $0`
 DIRNAME=`dirname $0`
 
 PROMPT="#"
+TMPCINDEXFILE=/tmp/kshell_index.txt
+TMPHISTORY=/tmp/kshell_history.$$
 TMPEXFILE=/tmp/kshell_run.$$
-TMPINDXFILE=/tmp/kshell_index.conf
 
 print_help(){
+	echo -e ""
 	echo -e "NAME"
 	echo -e "\t\tkshell - run a shell to simulate UNIX customer demo by simple to a return between each command"
 	echo -e "\t\tSYNOPSIS"
@@ -27,7 +29,7 @@ print_help(){
 	echo -e "\t\t-f FILE: specify FILE containing list of command to execute during demo"
 	echo -e "\t\t-z reset the command line index to the first command"
 	echo -e "\t\t-h print Help "
-	echo
+	echo -e ""
 	echo -e "SHELL GRAMMAR"
 	echo -e "\t\tunix_command"
 	echo -e "\t\t\tExecute any existing unix command"
@@ -47,73 +49,119 @@ print_help(){
 	echo -e "\t\t\texit kshell"
 	echo -e "\t\texit-reset-index"
 	echo -e "\t\t\texit kshell"
+	echo -e ""
 	echo -e "SHELL ENVIRONMENT VARIABLES"
 	echo -e "\t\tKSHELL_CMDLSTFILE"
 	echo -e "\t\t\tConfiguration File"
+	echo -e ""
+	echo -e "SEE ALSO"
+	echo -e "\t\tFull documentation <https://github.com/jbnetapp>"
+	echo -e ""
 }
 
 clean_and_exit(){
 	[ -f $TMPEXFILE ] && rm $TMPEXFILE 
+	[ -f $TMPHISTORY ] && rm $TMPHISTORY
 	exit $1 
+}
+
+get_cmdline(){
+	GETCMD=""
+	while IFS="" read -u 1 -r -s -n1 c ; do
+		echo -n "$c"
+		((${#c}==0)) && break
+		case "$c" in
+			$'\177')
+				if [ ${#GETCMD} -gt 0 ]; then
+					GETCMD="${GETCMD::-1}"
+					printf "\010\040\010\033[P"          # backspace
+				fi
+				continue;;
+		esac
+		GETCMD="${GETCMD}${c}"
+	done
 }
 
 run_print() {
  	CMD=$1
-   	stty -F /dev/tty -echo
- 	echo -n $PROMPT ; echo -n " "
+	if [ -z "$CMD" ] ; then 
+		echo ; return
+	fi
+	stty -F /dev/tty -echo
  	for i in $(seq 1 ${#CMD}); do
-        	echo -n "${CMD:i-1:1}"
+       		echo -n "${CMD:i-1:1}"
 		if [ "${CMD:i-1:1}" == " " ] ; then 
-        		sleep 0.08
+       			sleep 0.08
 		else 
-        		sleep 0.06
+       			sleep 0.06
 		fi
  	done
  	echo -n " " ; read -u 1 ; echo
  	echo $CMD > $TMPEXFILE ; chmod +x $TMPEXFILE
- 	$TMPEXFILE ; echo
+ 	$TMPEXFILE ;
+	if [ $? -eq 0 ] ; then 
+		hindex=$(($hindex + 1))
+		echo -e "${hindex}\t${CMD}" >> $TMPHISTORY
+	fi
    	stty -F /dev/tty echo
 }
 
 run_loop() {
 	echo -n $PROMPT ; echo -n " "
-	read -u 1 CMD
+	get_cmdline
+	CMD="$GETCMD"
 	while [ ! -z "$CMD" ]; do
-		[ "$CMD" == "index" ] && CMD="echo -n $cmd_indx"
-		[ "$CMD" == "list" ] && CMD="cat $KSHELL_CMDLSTFILE"
-		[ "$CMD" == "whoami" ] && CMD="echo -n $BASENAME"
+		if [ "$CMD" == "index" ] ; then  
+			echo ; echo $cindex; CMD=""
+		fi
+		if [ "$CMD" == "list" ] ; then  
+			CMD="cat $KSHELL_CMDLSTFILE"
+		fi
+		if [ "$CMD" == "whoami" ] ; then 
+			echo ; echo $BASENAME; CMD=""
+		fi
+		if [ "$CMD" == "history" ] ; then 
+			echo ; cat $TMPHISTORY ; CMD=""
+		fi
 		if [ "$CMD" == "next" ] ; then 
-			next_command=`head -$cmd_indx $KSHELL_CMDLSTFILE | tail +$cmd_indx`
-			CMD="echo -n $next_command"
+			next_command=`head -$cindex $KSHELL_CMDLSTFILE | tail +$cindex`
+			echo ; echo $next_command ; CMD=""
 		fi
 		if [ "$CMD" == "help" ] ; then 
 			print_help
-			CMD="echo"
+			echo; CMD=""
 		fi
 		if [ "$CMD" == "reset-index" ] ; then 
-			cmd_indx=1
-			CMD="echo -n $cmd_indx"
+			cindex=1
+			echo; CMD=""
 		fi
 		if [ "$CMD" == "back" ] ; then 
-			[ $cmd_indx -gt 1 ] && cmd_indx=$(($cmd_indx - 1))
-			CMD="echo -n"
+			[ $cindex -gt 1 ] && cindex=$(($cindex - 1))
+			echo; CMD=""
 		fi
 		if [ "$CMD" == "jump" ] ; then 
-			cmd_indx=$(($cmd_indx + 1))
-			CMD="echo -n"
+			cindex=$(($cindex + 1))
+			echo; CMD=""
 		fi
 		if [ "$CMD" == "exit" ] ; then 
-			echo "KSHELL_INDX=$cmd_indx" > $TMPINDXFILE
-			clean_and_exit 0
+			echo "KSHELL_CINDEX=$cindex" > $TMPCINDEXFILE
+			echo; clean_and_exit 0
 		fi
 		if [ "$CMD" == "exit-reset-index" ] ; then
-			[ -f $TMPINDXFILE ] && rm $TMPINDXFILE
-			clean_and_exit 0
+			[ -f $TMPCINDEXFILE ] && rm $TMPCINDEXFILE
+			echo; clean_and_exit 0
 		fi
- 		echo $CMD > $TMPEXFILE; chmod +x $TMPEXFILE
- 		$TMPEXFILE ; echo
+		if [ ! -z "$CMD" ]; then
+ 			echo; echo $CMD > $TMPEXFILE; chmod +x $TMPEXFILE
+ 			$TMPEXFILE ;
+			if [ $? -eq 0 ] ; then 
+				hindex=$(($hindex + 1))
+				echo -e "${hindex}\t${CMD}" >> $TMPHISTORY
+			fi
+		fi
 		echo -n $PROMPT ;  echo -n " " 
- 		read  -u 1 CMD
+		get_cmdline
+		CMD="$GETCMD"
  	done
 	return 0 
 }
@@ -122,7 +170,8 @@ run_loop() {
 # MAIN
 #
 
-[ -f $TMPINDXFILE ] && source $TMPINDXFILE
+[ -f $TMPCINDEXFILE ] && source $TMPCINDEXFILE
+[ ! -f $TMPHISTORY ] && touch $TMPHISTORY
 
 usage="usage kshell [-f filename] [-z] [-h]"
 while getopts ":f:zh" o; do
@@ -131,7 +180,7 @@ while getopts ":f:zh" o; do
 			KSHELL_CMDLSTFILE=$OPTARG
 			;;
 		z)
-			KSHELL_INDX=1
+			KSHELL_CINDEX=1
 			;;
 		h)
 			print_help
@@ -152,16 +201,16 @@ if [ ! -f $KSHELL_CMDLSTFILE ]; then
 	clean_and_exit 0
 fi
 
-[ -z $KSHELL_INDX ] && KSHELL_INDX=1
-cmd_indx=$KSHELL_INDX
+[ -z $KSHELL_CINDEX ] && KSHELL_CINDEX=1
+cindex=$KSHELL_CINDEX
 
 while [ true ] ; do
         run_loop
-	CMD=`head -$cmd_indx $KSHELL_CMDLSTFILE | tail +$cmd_indx`
+	CMD=`head -$cindex $KSHELL_CMDLSTFILE | tail +$cindex`
  	run_print "$CMD"
-	cmd_indx=$(($cmd_indx + 1))
+	cindex=$(($cindex + 1))
 done
 
-[ -f $TMPINDXFILE ] && rm $TMPINDXFILE
+[ -f $TMPCINDEXFILE ] && rm $TMPCINDEXFILE
 
 clean_and_exit 0
