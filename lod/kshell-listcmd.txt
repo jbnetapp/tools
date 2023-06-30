@@ -2,8 +2,8 @@ kubectl get nodes
 kubectl get storageclasses
 kubectl get namespaces
 helm list -n wordpress 
-kubectl get all -n wordpress
 kubectl get pod -n wordpress
+kubectl get all -n wordpress
 kubectl get services -n wordpress
 kubectl get secrets -n wordpress
 kubectl get pvc -n wordpress
