@@ -1,9 +1,7 @@
 #!/bin/bash
 #
-# Jerome.Blanchet@NetApp.com
 # Simple Shell for Demo
-#
-#set -x
+# Jerome.Blanchet@NetApp.com
 #
 # Environment variiable setup
 # KSHELL_CMDLSTFILE  : File containing the list of command to be executed during demo
