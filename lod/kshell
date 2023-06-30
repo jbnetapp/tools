@@ -6,7 +6,7 @@
 # Environment variiable setup
 # KSHELL_CMDLSTFILE  : File containing the list of command to be executed during demo
 #
-version=0.1
+version=0.2
 
 BASENAME=`basename $0`
 DIRNAME=`dirname $0`
@@ -64,11 +64,12 @@ print_help(){
 clean_and_exit(){
 	[ -f $TMPEXFILE ] && rm $TMPEXFILE 
 	[ -f $TMPHISTORY ] && rm $TMPHISTORY
+	echo "KSHELL_CINDEX=$cindex" > $TMPCINDEXFILE
 	exit $1 
 }
 
 get_cmdline(){
-	GETCMD=""
+	GETCMD="$1"
 	while IFS="" read -u 1 -r -s -n1 c ; do
 		echo -n "$c"
 		((${#c}==0)) && break
@@ -84,8 +85,8 @@ get_cmdline(){
 	done
 }
 
-run_print() {
- 	CMD=$1
+cli_print() {
+ 	CMD="$1"
 	if [ -z "$CMD" ] ; then 
 		echo ; return
 	fi
@@ -98,19 +99,15 @@ run_print() {
        			sleep 0.06
 		fi
  	done
- 	echo -n " " ; read -u 1 ; echo
- 	echo $CMD > $TMPEXFILE ; chmod +x $TMPEXFILE
- 	$TMPEXFILE ;
-	if [ $? -eq 0 ] ; then 
-		hindex=$(($hindex + 1))
-		echo -e "${hindex}\t${CMD}" >> $TMPHISTORY
-	fi
-   	stty -F /dev/tty echo
+	read -u 1; stty -F /dev/tty echo
 }
 
 run_loop() {
-	echo -n -e $KSHELL_PROMPT ; echo -n " "
-	get_cmdline
+ 	CMD="$1"
+	if [ -z "$CMD" ] ; then
+		echo -n -e $KSHELL_PROMPT ; echo -n " "
+	fi
+	get_cmdline "$CMD" 
 	CMD="$GETCMD"
 	while [ ! -z "$CMD" ]; do
 		if [ "$CMD" == "index" ] ; then  
@@ -146,11 +143,10 @@ run_loop() {
 			echo; CMD=""
 		fi
 		if [ "$CMD" == "exit" ] ; then 
-			echo "KSHELL_CINDEX=$cindex" > $TMPCINDEXFILE
 			echo; clean_and_exit 0
 		fi
 		if [ "$CMD" == "exit-reset-index" ] ; then
-			[ -f $TMPCINDEXFILE ] && rm $TMPCINDEXFILE
+			cindex=1
 			echo; clean_and_exit 0
 		fi
 		if [ ! -z "$CMD" ]; then
@@ -159,18 +155,21 @@ run_loop() {
 			if [ $? -eq 0 ] ; then 
 				hindex=$(($hindex + 1))
 				echo -e "${hindex}\t${CMD}" >> $TMPHISTORY
+				CMD=""
 			fi
 		fi
 		echo -n -e $KSHELL_PROMPT ;  echo -n " " 
 		get_cmdline
 		CMD="$GETCMD"
  	done
-	return 0 
+	return 0
 }
 
 #
 # MAIN
 #
+
+trap "clean_and_exit" 2
 
 [ -f $TMPCINDEXFILE ] && source $TMPCINDEXFILE
 [ ! -f $TMPHISTORY ] && touch $TMPHISTORY
@@ -207,9 +206,9 @@ fi
 cindex=$KSHELL_CINDEX
 
 while [ true ] ; do
-        run_loop
+        run_loop "$CMD"
 	CMD=`head -$cindex $KSHELL_CMDLSTFILE | tail +$cindex`
- 	run_print "$CMD"
+ 	cli_print "$CMD"
 	cindex=$(($cindex + 1))
 done
 

@@ -7,4 +7,6 @@ kubectl get all -n wordpress
 kubectl get services -n wordpress
 kubectl get secrets -n wordpress
 kubectl get pvc -n wordpress
+ssh cluster1 volume show |grep  
 kubectl get volumesnapshots -n wordpress
+ssh cluster1 volume snapshot show -volume
