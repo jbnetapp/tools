@@ -11,7 +11,7 @@ version=0.1
 BASENAME=`basename $0`
 DIRNAME=`dirname $0`
 
-PROMPT="#"
+[ -z "$KSHELL_PROMPT" ] && KSHELL_PROMPT="\e[1;32mkshell\e[0m # "
 TMPCINDEXFILE=/tmp/kshell_index.txt
 TMPHISTORY=/tmp/kshell_history.$$
 TMPEXFILE=/tmp/kshell_run.$$
@@ -42,15 +42,19 @@ print_help(){
 	echo -e "\t\tback"        
 	echo -e "\t\t\tBack to the preview command in the list"
 	echo -e "\t\treset-index "
-	echo -e "\t\t\treset the command line index to the first command"
+	echo -e "\t\t\tReset the command line index to the first command"
+	echo -e "\t\thistory"
+	echo -e "\t\t\tDisplay history command Line"
 	echo -e "\t\texit"
-	echo -e "\t\t\texit kshell"
+	echo -e "\t\t\tExit kshell"
 	echo -e "\t\texit-reset-index"
-	echo -e "\t\t\texit kshell"
+	echo -e "\t\t\tExit kshell and reset the Command list index"
 	echo -e ""
 	echo -e "SHELL ENVIRONMENT VARIABLES"
 	echo -e "\t\tKSHELL_CMDLSTFILE"
-	echo -e "\t\t\tConfiguration File"
+	echo -e "\t\t\tSpecify your default List Command File to execute during demo"
+	echo -e "\t\tKSHELL_PROMPT"
+	echo -e "\t\t\tSet your own prompt"
 	echo -e ""
 	echo -e "SEE ALSO"
 	echo -e "\t\tFull documentation <https://github.com/jbnetapp>"
@@ -105,7 +109,7 @@ run_print() {
 }
 
 run_loop() {
-	echo -n $PROMPT ; echo -n " "
+	echo -n -e $KSHELL_PROMPT ; echo -n " "
 	get_cmdline
 	CMD="$GETCMD"
 	while [ ! -z "$CMD" ]; do
@@ -157,7 +161,7 @@ run_loop() {
 				echo -e "${hindex}\t${CMD}" >> $TMPHISTORY
 			fi
 		fi
-		echo -n $PROMPT ;  echo -n " " 
+		echo -n -e $KSHELL_PROMPT ;  echo -n " " 
 		get_cmdline
 		CMD="$GETCMD"
  	done
