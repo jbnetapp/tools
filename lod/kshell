@@ -70,10 +70,14 @@ print_help(){
 }
 
 clean_and_exit(){
-	[ -f $TMPEXFILE ] && rm $TMPEXFILE 
+	[ -f $TMPEXFILE ] && rm $TMPEXFILE
 	[ -f $TMPHISTORY ] && rm $TMPHISTORY
 	echo "KSHELL_CINDEX=$cindex" > $TMPCINDEXFILE
-	[ $1 -eq 0 ] && tput reset
+	if [ -z $1 ] ; then
+		tput reset
+	else
+		[ $1 -eq 0 ] && tput reset
+	fi
 	exit $1 
 }
 
@@ -92,6 +96,9 @@ get_cmdline(){
 					read -u 1 -r -s -n1 -t 0.1 ctmp
 					case "$ctmp" in
 						"A") # Arrow Up
+							if [ $hindex -eq 1 ]; then
+								GETCMD=`head -$hindex $TMPHISTORY | tail +$hindex`
+							fi
 							if [ $hindex -gt 1 ]; then
 								hindex=$(($hindex - 1))
 								GETCMD=`head -$hindex $TMPHISTORY | tail +$hindex`
@@ -100,6 +107,9 @@ get_cmdline(){
 							continue ;;
 						"B") # Arrow down
 							hcount=`cat $TMPHISTORY | wc -l` ; hcount=$(($hcount - 1))
+							if [ $hindex -eq 1 ]; then
+								GETCMD=`head -$hindex $TMPHISTORY | tail +$hindex`
+							fi
 							if [ $hindex -le $hcount ]; then
 								hindex=$(($hindex + 1))
 								GETCMD=`head -$hindex $TMPHISTORY | tail +$hindex`
@@ -233,7 +243,7 @@ run_loop() {
 # MAIN
 #
 
-trap "clean_and_exit" 2
+trap "clean_and_exit 1" 2
 
 [ -f $TMPCINDEXFILE ] && source $TMPCINDEXFILE
 [ ! -f $TMPHISTORY ] && touch $TMPHISTORY
@@ -266,9 +276,12 @@ if [ ! -f $KSHELL_CMDLSTFILE ]; then
 	clean_and_exit 1
 fi
 
+# Setup Indexes
 [ -z $KSHELL_CINDEX ] && KSHELL_CINDEX=1
 cindex=$KSHELL_CINDEX
+hindex=0
 
+# Start kshell
 while [ true ] ; do
         run_loop "$CMD"
 	if [ $KSHELL_RUN -eq 0 ]; then
@@ -279,7 +292,5 @@ while [ true ] ; do
 	fi
  	cli_print "$CMD"
 done
-
-[ -f $TMPCINDEXFILE ] && rm $TMPCINDEXFILE
 
 clean_and_exit 0
