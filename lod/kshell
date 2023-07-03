@@ -12,6 +12,8 @@ BASENAME=`basename $0`
 DIRNAME=`dirname $0`
 
 [ -z "$KSHELL_PROMPT" ] && KSHELL_PROMPT="\e[1;32mkshell\e[0m # "
+[ -z "$KSHELL_RUN" ] && KSHELL_RUN=1
+
 TMPCINDEXFILE=/tmp/kshell_index.txt
 TMPHISTORY=/tmp/kshell_history.$$
 TMPEXFILE=/tmp/kshell_run.$$
@@ -108,13 +110,13 @@ get_cmdline(){
 
 cli_print() {
  	CMD="$1"
-	if [ -z "$CMD" ] ; then 
+	if [ -z "$CMD" ] ; then
 		echo ; return
 	fi
 	stty -F /dev/tty -echo
  	for i in $(seq 1 ${#CMD}); do
        		echo -n "${CMD:i-1:1}"
-		if [ "${CMD:i-1:1}" == " " ] ; then 
+		if [ "${CMD:i-1:1}" == " " ] ; then
        			sleep 0.08
 		else 
        			sleep 0.06
@@ -131,39 +133,48 @@ run_loop() {
 	get_cmdline "$CMD" 
 	CMD="$GETCMD"
 	while [ ! -z "$CMD" ]; do
-		if [ "$CMD" == "index" ] ; then  
+		if [ "$CMD" == "start" ] ; then
+			echo ; export KSHELL_RUN=1 ; CMD=""
+		fi
+		if [ "$CMD" == "stop" ] ; then
+			echo ; export KSHELL_RUN=0 ; CMD=""
+		fi
+		if [ "$CMD" == "status" ] ; then
+			echo ; echo $KSHELL_RUN; CMD=""
+		fi
+		if [ "$CMD" == "index" ] ; then
 			echo ; echo $cindex; CMD=""
 		fi
-		if [ "$CMD" == "list" ] ; then  
+		if [ "$CMD" == "list" ] ; then
 			CMD="cat $KSHELL_CMDLSTFILE"
 		fi
-		if [ "$CMD" == "whoami" ] ; then 
+		if [ "$CMD" == "whoami" ] ; then
 			echo ; echo $BASENAME; CMD=""
 		fi
-		if [ "$CMD" == "history" ] ; then 
-			echo ; cat $TMPHISTORY ; CMD=""
+		if [ "$CMD" == "history" ] ; then
+			echo ; cat -n $TMPHISTORY ; CMD=""
 		fi
-		if [ "$CMD" == "next" ] ; then 
+		if [ "$CMD" == "next" ] ; then
 			next_command=`head -$cindex $KSHELL_CMDLSTFILE | tail +$cindex`
 			echo ; echo $next_command ; CMD=""
 		fi
-		if [ "$CMD" == "help" ] ; then 
+		if [ "$CMD" == "help" ] ; then
 			print_help
 			echo; CMD=""
 		fi
-		if [ "$CMD" == "reset-index" ] ; then 
+		if [ "$CMD" == "reset-index" ] ; then
 			cindex=1
 			echo; CMD=""
 		fi
-		if [ "$CMD" == "back" ] ; then 
+		if [ "$CMD" == "back" ] ; then
 			[ $cindex -gt 1 ] && cindex=$(($cindex - 1))
 			echo; CMD=""
 		fi
-		if [ "$CMD" == "jump" ] ; then 
+		if [ "$CMD" == "jump" ] ; then
 			cindex=$(($cindex + 1))
 			echo; CMD=""
 		fi
-		if [ "$CMD" == "exit" ] ; then 
+		if [ "$CMD" == "exit" ] ; then
 			echo; clean_and_exit 0
 		fi
 		if [ "$CMD" == "exit-reset-index" ] ; then
@@ -173,9 +184,12 @@ run_loop() {
 		if [ ! -z "$CMD" ]; then
  			echo; echo $CMD > $TMPEXFILE; chmod +x $TMPEXFILE
  			$TMPEXFILE ;
-			if [ $? -eq 0 ] ; then 
-				hindex=$(($hindex + 1))
-				echo -e "${hindex}\t${CMD}" >> $TMPHISTORY
+			if [ $? -eq 0 ] ; then
+				LASTCMD=`tail -1 $TMPHISTORY`
+				if [ "$CMD" != "$LASTCMD" ] ; then
+					hindex=$(($hindex + 1))
+					echo -e "${CMD}" >> $TMPHISTORY
+				fi
 				CMD=""
 			fi
 		fi
@@ -228,9 +242,13 @@ cindex=$KSHELL_CINDEX
 
 while [ true ] ; do
         run_loop "$CMD"
-	CMD=`head -$cindex $KSHELL_CMDLSTFILE | tail +$cindex`
+	if [ $KSHELL_RUN -eq 0 ]; then
+		CMD=""
+	else
+		CMD=`head -$cindex $KSHELL_CMDLSTFILE | tail +$cindex`
+		cindex=$(($cindex + 1))
+	fi
  	cli_print "$CMD"
-	cindex=$(($cindex + 1))
 done
 
 [ -f $TMPCINDEXFILE ] && rm $TMPCINDEXFILE
