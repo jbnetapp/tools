@@ -91,11 +91,20 @@ get_cmdline(){
 					# Arrow
 					read -u 1 -r -s -n1 -t 0.1 ctmp
 					case "$ctmp" in
-						"A")
-							tput rc; echo -n "up" ; tput rc
+						"A") # Arrow Up
+							if [ $hindex -gt 1 ]; then
+								hindex=$(($hindex - 1))
+								GETCMD=`head -$hindex $TMPHISTORY | tail +$hindex`
+							fi
+							tput rc; tput el; echo -n "$GETCMD" ; tput rc ;
 							continue ;;
-						"B")
-							tput rc; echo -n "down" ; tput rc
+						"B") # Arrow down
+							hcount=`cat $TMPHISTORY | wc -l` ; hcount=$(($hcount - 1))
+							if [ $hindex -le $hcount ]; then
+								hindex=$(($hindex + 1))
+								GETCMD=`head -$hindex $TMPHISTORY | tail +$hindex`
+							fi
+							tput rc; tput el; echo -n "$GETCMD" ; tput rc ;
 							continue ;;
 						"C")
 							tput rc
@@ -170,6 +179,9 @@ run_loop() {
 		if [ "$CMD" == "history" ] || [ "$CMD" == "h" ] ; then
 			echo ; cat -n $TMPHISTORY ; CMD=""
 		fi
+		if [ "$CMD" == "history-index" ] || [ "$CMD" == "hi" ] ; then
+			echo ; echo $hindex; CMD=""
+		fi
 		if [ "$CMD" == "next" ] || [ "$CMD" == "n" ] ; then
 			next_command=`cat -n $KSHELL_CMDLSTFILE | head -$cindex | tail +$cindex`
 			echo ; echo $next_command ; CMD=""
@@ -203,7 +215,8 @@ run_loop() {
 			if [ $? -eq 0 ] ; then
 				LASTCMD=`tail -1 $TMPHISTORY`
 				if [ "$CMD" != "$LASTCMD" ] ; then
-					hindex=$(($hindex + 1))
+					hcount=`cat $TMPHISTORY | wc -l`
+					hindex=$(($hcount + 1))
 					echo -e "${CMD}" >> $TMPHISTORY
 				fi
 				CMD=""
