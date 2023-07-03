@@ -73,7 +73,7 @@ clean_and_exit(){
 	[ -f $TMPEXFILE ] && rm $TMPEXFILE 
 	[ -f $TMPHISTORY ] && rm $TMPHISTORY
 	echo "KSHELL_CINDEX=$cindex" > $TMPCINDEXFILE
-	tput reset
+	[ $1 -eq 0 ] && tput reset
 	exit $1 
 }
 
@@ -263,7 +263,7 @@ shift $((OPTIND-1))
 
 if [ ! -f $KSHELL_CMDLSTFILE ]; then
 	echo "ERROR: KSHELL_CMDLSTFILE: $KSHELL_CMDLSTFILE no such file"
-	clean_and_exit 0
+	clean_and_exit 1
 fi
 
 [ -z $KSHELL_CINDEX ] && KSHELL_CINDEX=1
