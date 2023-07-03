@@ -33,21 +33,27 @@ print_help(){
 	echo -e "SHELL GRAMMAR"
 	echo -e "\t\tunix_command"
 	echo -e "\t\t\tExecute any existing unix command"
-	echo -e "\t\tlist"
+	echo -e "\t\t[carriage return]"
+	echo -e "\t\t\tExecute the next command in the list"
+	echo -e "\t\tstart"
+	echo -e "\t\t\tStart execute mode"
+	echo -e "\t\tstop"
+	echo -e "\t\t\tStop execute mode"
+	echo -e "\t\tlist or l"
 	echo -e "\t\t\tPrint the command list to execute"
-	echo -e "\t\tindex"
+	echo -e "\t\tindex or i"
 	echo -e "\t\t\tPrint the current index"
-	echo -e "\t\tnext"
+	echo -e "\t\tnext or n"
 	echo -e "\t\t\tPrint the next command to execute"
-	echo -e "\t\tjump"        
+	echo -e "\t\tjump or j"
 	echo -e "\t\t\tJump to the next command in the list"
-	echo -e "\t\tback"        
+	echo -e "\t\tback or b"
 	echo -e "\t\t\tBack to the preview command in the list"
-	echo -e "\t\treset-index "
+	echo -e "\t\treset-index or ri "
 	echo -e "\t\t\tReset the command line index to the first command"
-	echo -e "\t\thistory"
+	echo -e "\t\thistory or h"
 	echo -e "\t\t\tDisplay history command Line"
-	echo -e "\t\texit"
+	echo -e "\t\texit or quit"
 	echo -e "\t\t\tExit kshell"
 	echo -e "\t\texit-reset-index"
 	echo -e "\t\t\tExit kshell and reset the Command list index"
@@ -142,39 +148,39 @@ run_loop() {
 		if [ "$CMD" == "status" ] ; then
 			echo ; echo $KSHELL_RUN; CMD=""
 		fi
-		if [ "$CMD" == "index" ] ; then
+		if [ "$CMD" == "index" ] || [ "$CMD" == "i" ] ; then
 			echo ; echo $cindex; CMD=""
 		fi
-		if [ "$CMD" == "list" ] ; then
-			CMD="cat $KSHELL_CMDLSTFILE"
+		if [ "$CMD" == "list" ] || [ "$CMD" == "l" ] ; then
+			CMD="cat -n $KSHELL_CMDLSTFILE"
 		fi
 		if [ "$CMD" == "whoami" ] ; then
 			echo ; echo $BASENAME; CMD=""
 		fi
-		if [ "$CMD" == "history" ] ; then
+		if [ "$CMD" == "history" ] || [ "$CMD" == "h" ] ; then
 			echo ; cat -n $TMPHISTORY ; CMD=""
 		fi
-		if [ "$CMD" == "next" ] ; then
-			next_command=`head -$cindex $KSHELL_CMDLSTFILE | tail +$cindex`
+		if [ "$CMD" == "next" ] || [ "$CMD" == "n" ] ; then
+			next_command=`cat -n $KSHELL_CMDLSTFILE | head -$cindex | tail +$cindex`
 			echo ; echo $next_command ; CMD=""
 		fi
 		if [ "$CMD" == "help" ] ; then
 			print_help
 			echo; CMD=""
 		fi
-		if [ "$CMD" == "reset-index" ] ; then
+		if [ "$CMD" == "reset-index" ] || [ "$CMD" == "ri" ]; then
 			cindex=1
 			echo; CMD=""
 		fi
-		if [ "$CMD" == "back" ] ; then
+		if [ "$CMD" == "back" ] || [ "$CMD" == "b" ]  ; then
 			[ $cindex -gt 1 ] && cindex=$(($cindex - 1))
 			echo; CMD=""
 		fi
-		if [ "$CMD" == "jump" ] ; then
+		if [ "$CMD" == "jump" ] || [ "$CMD" == "j" ] ; then
 			cindex=$(($cindex + 1))
 			echo; CMD=""
 		fi
-		if [ "$CMD" == "exit" ] ; then
+		if [ "$CMD" == "exit" ] || [ "$CMD" == "quit" ] ; then
 			echo; clean_and_exit 0
 		fi
 		if [ "$CMD" == "exit-reset-index" ] ; then
