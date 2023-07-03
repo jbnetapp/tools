@@ -73,6 +73,7 @@ clean_and_exit(){
 	[ -f $TMPEXFILE ] && rm $TMPEXFILE 
 	[ -f $TMPHISTORY ] && rm $TMPHISTORY
 	echo "KSHELL_CINDEX=$cindex" > $TMPCINDEXFILE
+	tput reset
 	exit $1 
 }
 
@@ -83,16 +84,25 @@ get_cmdline(){
 		((${#c}==0)) && break
 		case "$c" in
 			$'\x1b')
+				tput sc
 				read -u 1 -r -s -n1 -t 0.1 ctmp 
 				# Handle ESC sequence
 				if [[ "$ctmp" == "[" ]]; then
 					# Arrow
 					read -u 1 -r -s -n1 -t 0.1 ctmp
 					case "$ctmp" in
-						"A") continue ;;
-						"B") continue ;;
-						"C") continue ;;
-						"D") continue ;;
+						"A")
+							tput rc; echo -n "up" ; tput rc
+							continue ;;
+						"B")
+							tput rc; echo -n "down" ; tput rc
+							continue ;;
+						"C")
+							tput rc
+							continue ;;
+						"D")
+							tput rc
+							continue ;;
 					esac
 				fi
 				read -u 1 -r -s -n1 -t 0.1
@@ -165,7 +175,7 @@ run_loop() {
 			echo ; echo $next_command ; CMD=""
 		fi
 		if [ "$CMD" == "help" ] ; then
-			print_help
+			print_help |more
 			echo; CMD=""
 		fi
 		if [ "$CMD" == "reset-index" ] || [ "$CMD" == "ri" ]; then
@@ -225,7 +235,7 @@ while getopts ":f:zh" o; do
 			KSHELL_CINDEX=1
 			;;
 		h)
-			print_help
+			print_help |more
 			clean_and_exit 0
 			;;
                 *)
