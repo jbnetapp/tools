@@ -225,15 +225,22 @@ run_loop() {
 			echo; clean_and_exit 0
 		fi
 		if [ ! -z "$CMD" ]; then
- 			echo; echo $CMD > $TMPEXFILE; chmod +x $TMPEXFILE
- 			$TMPEXFILE ;
-			if [ $? -eq 0 ] ; then
-				LASTCMD=`tail -1 $TMPHISTORY`
-				if [ "$CMD" != "$LASTCMD" ] ; then
-					hcount=`cat $TMPHISTORY | wc -l`
-					hindex=$(($hcount + 1))
-					echo -e "${CMD}" >> $TMPHISTORY
+			CMDBIN=`echo $CMD | awk '{print $1}'`
+			which $CMDBIN > /dev/null 2>&1
+			if [ $? -eq 0 ]; then
+ 				echo; echo $CMD > $TMPEXFILE; chmod +x $TMPEXFILE
+ 				$TMPEXFILE ;
+				if [ $? -eq 0 ] ; then
+					LASTCMD=`tail -1 $TMPHISTORY`
+					if [ "$CMD" != "$LASTCMD" ] ; then
+						hcount=`cat $TMPHISTORY | wc -l`
+						hindex=$(($hcount + 1))
+						echo -e "${CMD}" >> $TMPHISTORY
+					fi
+					CMD=""
 				fi
+			else
+				echo ; echo "kshell $CMDBIN: command not found"
 				CMD=""
 			fi
 		fi
