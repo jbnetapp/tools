@@ -16,7 +16,9 @@ DIRNAME=`dirname $0`
 
 TMPCINDEXFILE=/tmp/kshell_index.txt
 TMPHISTORY=/tmp/kshell_history.$$
+TMPCLISLOWDOWNFACTOR=/tmp/kshell_clislowdownfactor.txt
 TMPEXFILE=/tmp/kshell_run.$$
+
 
 print_help(){
 	echo -e ""
@@ -53,6 +55,12 @@ print_help(){
 	echo -e "\t\t\tReset the command line index to the first command"
 	echo -e "\t\thistory or h"
 	echo -e "\t\t\tDisplay history command Line"
+	echo -e "\t\tCTRL + O"
+	echo -e "\t\t\tIncrease (Overstep) keysleep wait time (ms)"
+	echo -e "\t\tCTRL + L"
+	echo -e "\t\t\tLower keysleep wait time (ms)"
+	echo -e "\t\tCTRL + N"
+	echo -e "\t\t\tNew Line"
 	echo -e "\t\texit or quit"
 	echo -e "\t\t\tExit kshell"
 	echo -e "\t\texit-reset-index"
@@ -73,6 +81,7 @@ clean_and_exit(){
 	[ -f $TMPEXFILE ] && rm $TMPEXFILE
 	[ -f $TMPHISTORY ] && rm $TMPHISTORY
 	echo "KSHELL_CINDEX=$cindex" > $TMPCINDEXFILE
+	echo "CLISLOWDOWNFACTOR=$CLISLOWDOWNFACTOR" > $TMPCLISLOWDOWNFACTOR
 	if [ -z $1 ] ; then
 		tput reset
 	else
@@ -84,11 +93,10 @@ clean_and_exit(){
 get_cmdline(){
 	GETCMD="$1"
 	while IFS="" read -u 1 -r -s -n1 c ; do
-		echo -n "$c"
 		((${#c}==0)) && break
+		tput sc
 		case "$c" in
 			$'\x1b')
-				tput sc
 				read -u 1 -r -s -n1 -t 0.1 ctmp 
 				# Handle ESC sequence
 				if [[ "$ctmp" == "[" ]]; then
@@ -142,6 +150,19 @@ get_cmdline(){
 				echo; echo -n -e $KSHELL_PROMPT ; echo -n " "
 				clean_and_exit 0
 				continue;;
+			$'\014')
+				# Handle CTRL-L  
+				[ $CLISLOWDOWNFACTOR -gt 1 ] && CLISLOWDOWNFACTOR=$(($CLISLOWDOWNFACTOR - 1))
+				tput rc; tput el; echo -n "keysleep (ms) $CLISLOWDOWNFACTOR" ; tput rc
+				continue;;
+			$'\017')
+				# Handle CTRL-O
+				CLISLOWDOWNFACTOR=$(($CLISLOWDOWNFACTOR + 1))
+				tput rc; tput el; echo -n "keysleep (ms) $CLISLOWDOWNFACTOR" ; tput rc
+				continue;;
+			*)
+				echo -n "$c"
+				;;
 					
 		esac
 		GETCMD="${GETCMD}${c}"
@@ -157,9 +178,12 @@ cli_print() {
  	for i in $(seq 1 ${#CMD}); do
        		echo -n "${CMD:i-1:1}"
 		if [ "${CMD:i-1:1}" == " " ] ; then
-       			sleep 0.08
+			keysleep=`echo "(${CLISLOWDOWNFACTOR}+5)*0.001" |bc`
+			sleep $keysleep
 		else 
-       			sleep 0.06
+			keysleep=`echo "${CLISLOWDOWNFACTOR}*0.001" |bc`
+			sleep $keysleep
+       			# sleep 0.06
 		fi
  	done
 	read -u 1; stty -F /dev/tty echo
@@ -257,6 +281,10 @@ run_loop() {
 
 trap "clean_and_exit 1" 2
 
+# Setup Default Variables
+
+CLISLOWDOWNFACTOR=10
+[ -f $TMPCLISLOWDOWNFACTOR ] && source $TMPCLISLOWDOWNFACTOR
 [ -f $TMPCINDEXFILE ] && source $TMPCINDEXFILE
 [ ! -f $TMPHISTORY ] && touch $TMPHISTORY
 
