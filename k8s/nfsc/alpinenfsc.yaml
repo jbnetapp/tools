@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alpine-nfsc
+  namespace: alpine 
+
+spec:
+  securityContext:
+    runAsUser: 1000
+  containers:
+  - image: alpine:3.2
+    command:
+      - /bin/sh
+      - "-c"
+      - "sleep 60m"
+
+    imagePullPolicy: IfNotPresent
+    name: alpine
+    volumeMounts:
+     - name: volcifs1
+       mountPath: /volcifs1
+  volumes:
+  - name: volcifs1
+    nfs:
+      server: 172.30.0.134 
+      path: /volcifs1
+  restartPolicy: Always

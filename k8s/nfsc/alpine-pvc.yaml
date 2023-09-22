@@ -1,0 +1,25 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: alpine-pvc 
+  namespace: alpine
+spec:
+  securityContext:
+    runAsUser: 1000
+  volumes:
+    - name: task-pv-storage
+      persistentVolumeClaim:
+       claimName: pvc-volcifs1 
+
+  containers:
+    - name: task-pv-container
+      image: alpine:3.2
+
+      command:
+        - /bin/sh
+        - "-c"
+        - "sleep 60m"
+
+      volumeMounts:
+        - mountPath: "/data"
+          name: task-pv-storage
