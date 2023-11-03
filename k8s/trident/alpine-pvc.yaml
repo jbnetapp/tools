@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: alpine1-pvc-voldata1
+  namespace: alpine 
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: netapp-file 
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alpine-trident
+  namespace: alpine
+spec:
+  volumes:
+    - name: alpine1-pv-voldata1
+      persistentVolumeClaim:
+       claimName: alpine1-pvc-voldata1
+  containers:
+    - name: task-pv-container
+      image: alpine:3.2
+      command:
+        - /bin/sh
+        - "-c"
+        - "sleep 60m"
+      volumeMounts:
+        - mountPath: "/data1"
+          name: alpine1-pv-voldata1
