@@ -1,0 +1,7 @@
+# sudo yum install openmpi-devel
+# sudo yum install openmpi
+
+$ mpic++ parallel_io.cpp -o parallel_io
+$ mpirun -np 2 parallel_io
+Parallel binary write completed!
+Data validation succeeded!
