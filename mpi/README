@@ -1,7 +1,33 @@
+Install Open MPI in RHEL:
 # sudo yum install openmpi-devel
 # sudo yum install openmpi
 
+Build and Run the test MPI validation Program
 $ mpic++ parallel_io.cpp -o parallel_io
-$ mpirun -np 2 parallel_io
-Parallel binary write completed!
-Data validation succeeded!
+$ mpirun -np 6 parallel_io
+
+Build and Run the test MPI validation Program 
+First arg is the file size in MB
+$ mpic++ parallel_io_perf.cpp -o parallel_io_perf
+$ mpirun -np 4 --oversubscribe ./parallel_io_perf 1024
+MPI[2]: Start Creating random char in memory 256 MB
+MPI[1]: Start Creating random char in memory 256 MB
+MPI[3]: Start Creating random char in memory 256 MB
+MPI[0]: Start Creating random char in memory 256 MB
+MPI[3]: Start Parallel Write
+MPI[1]: Start Parallel Write
+MPI[2]: Start Parallel Write
+MPI[0]: Start Parallel Write
+MPI[2]: Write completed Throughput 39.5734 MBps
+MPI[0]: Write completed Throughput 30.1164 MBps
+MPI[1]: Write completed Throughput 57.8002 MBps
+MPI[3]: Write completed Throughput 111.38 MBps
+MPI[0]: Start Parallel Read
+MPI[1]: Start Parallel Read
+MPI[3]: Start Parallel Read
+MPI[2]: Start Parallel Read
+MPI[0]: Read completed Throughput 30.1164 MBps
+MPI[1]: Read completed Throughput 57.8002 MBps
+MPI[3]: Read completed Throughput 111.38 MBps
+MPI[2]: Read completed Throughput 39.5734 MBps
+
