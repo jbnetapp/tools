@@ -5,27 +5,45 @@
 #include <cstdlib>
 #include <chrono>
 
+// version beta 5
+//
 
 int main(int argc, char* argv[]) {
     MPI_Init(&argc, &argv);
 
     int nodeID ;
+    int fileSizeMB ;
+    int numIterations = 1 ;
+    int counter = 0 ; 
+    const char* filename ;
+    std::string version = "beta 5" ;
+    std::string Usage = "Usage:" + std::string(argv[0]) + " <node_ID> <sizeMB> [numIterations] [filename]";
 
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <Node_ID> <size in MB>"  << std::endl;
-        MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+    if (argc < 3) {
+        std::cerr << Usage  << std::endl;
+	MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
     } else {
     	try {
         	nodeID = std::stoi(argv[1]);
+        	fileSizeMB = std::stoi(argv[2]);
+        	numIterations = std::stoi(argv[3]);
     	} 
     	catch (std::invalid_argument const &e) {
-        	std::cerr << "Error: " << argv[1] << " is not a valid integer." << std::endl;
-        	MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+        	//std::cerr << "Error: " << argv[1] << " is not a valid integer." << std::endl;
+                std::cerr << Usage  << std::endl;
+		MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
     	} 
     	catch (std::out_of_range const &e) {
-        	std::cerr << "Error: " << argv[1] << " is too large to be represented as an integer." << std::endl;
-        	MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+        	//std::cerr << "Error: " << argv[1] << " is too large to be represented as an integer.\n" << std::endl;
+                std::cerr << Usage  << std::endl;
+		MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
     	}
+    }
+
+    if (argc == 5){
+	    filename = argv[4] ;
+    } else {
+	    filename = "random.dat" ;
     }
 
     int rank, size;
@@ -33,11 +51,11 @@ int main(int argc, char* argv[]) {
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
     MPI_File file;
-    MPI_File_open(MPI_COMM_WORLD, "random.dat", MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &file);
 
     const long long totalSize = std::atoll(argv[2]) * 1024 * 1024; // Total size of the file in bytes
     const long long chunkSize = totalSize / size; // Size of the chunk that each process will write
 
+    std::cout << "MPI[" << nodeID << "][" << rank << "]: version: " << version  << std::endl;
     std::cout << "MPI[" << nodeID << "][" << rank << "]: Start Creating random char in memory " << chunkSize / 1024 / 1024 << " MB"  << std::endl;
     std::vector<char> data(chunkSize);
     std::random_device rd;
@@ -47,37 +65,41 @@ int main(int argc, char* argv[]) {
         data[i] = static_cast<char>(dis(gen));
     }
 
-    std::cout << "MPI[" << nodeID << "][" << rank << "]: Start Parallel Write "  << std::endl;
-    auto start = std::chrono::high_resolution_clock::now();
-    MPI_File_write_at(file, ((nodeID * chunkSize * size) + (rank * chunkSize)), data.data(), chunkSize, MPI_CHAR, MPI_STATUS_IGNORE);
-    auto stop = std::chrono::high_resolution_clock::now();
+    for (int i = 0 ; i < numIterations ; i++ ) {
+	counter++;
+    	// open the file for writing 
+        MPI_File_open(MPI_COMM_WORLD, filename , MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &file);
 
-    MPI_File_close(&file);
+    	std::cout << "MPI[" << nodeID << "][" << rank << "]: Start Parallel Write in [" << filename << "] iteration [" << counter << "]"  << std::endl;
+    	auto start = std::chrono::high_resolution_clock::now();
+    	MPI_File_write_at(file, ((nodeID * chunkSize * size) + (rank * chunkSize)), data.data(), chunkSize, MPI_CHAR, MPI_STATUS_IGNORE);
+    	auto stop = std::chrono::high_resolution_clock::now();
 
-    std::chrono::duration<double> duration = stop - start;
-    double timeTakenSeconds = duration.count();
-    double throughputMBps = (chunkSize / (1024.0 * 1024)) / timeTakenSeconds;
+    	MPI_File_close(&file);
 
-    std::cout << "MPI[" << nodeID << "][" << rank << "]: Write completed Throughput " << throughputMBps << " MBps"  << std::endl;
+    	std::chrono::duration<double> duration = stop - start;
+    	double timeTakenSeconds = duration.count();
+    	double throughputMBps = (chunkSize / (1024.0 * 1024)) / timeTakenSeconds;
 
-    // Reopen the file for reading
-    MPI_File_open(MPI_COMM_WORLD, "random.dat", MPI_MODE_RDONLY, MPI_INFO_NULL, &file);
+    	std::cout << "MPI[" << nodeID << "][" << rank << "]: Write completed Throughput " << throughputMBps << " MBps"  << std::endl;
 
-    std::vector<char> readData(chunkSize);
+    	// Reopen the file for reading
+    	MPI_File_open(MPI_COMM_WORLD, "random.dat", MPI_MODE_RDONLY, MPI_INFO_NULL, &file);
 
-    std::cout << "MPI[" << nodeID << "][" << rank << "]: Start Parallel Read "  << std::endl;
-    auto startRead = std::chrono::high_resolution_clock::now();
-    MPI_File_read_at(file, ((nodeID * chunkSize * size) + (rank * chunkSize)), readData.data(), chunkSize, MPI_CHAR, MPI_STATUS_IGNORE);
-    auto stopRead = std::chrono::high_resolution_clock::now();
+    	std::cout << "MPI[" << nodeID << "][" << rank << "]: Start Parallel Read in [" << filename << "] iteration [" << counter << "]"  << std::endl;
+    	auto startRead = std::chrono::high_resolution_clock::now();
+    	MPI_File_read_at(file, ((nodeID * chunkSize * size) + (rank * chunkSize)), data.data(), chunkSize, MPI_CHAR, MPI_STATUS_IGNORE);
+    	auto stopRead = std::chrono::high_resolution_clock::now();
 
-    MPI_File_close(&file);
+    	MPI_File_close(&file);
 
-    std::chrono::duration<double> durationRead = stopRead - startRead;
-    double timeTakenSecondsRead = durationRead.count();
-    double throughputMBpsRead = (chunkSize / (1024.0 * 1024)) / timeTakenSecondsRead;
+    	std::chrono::duration<double> durationRead = stopRead - startRead;
+    	double timeTakenSecondsRead = durationRead.count();
+    	double throughputMBpsRead = (chunkSize / (1024.0 * 1024)) / timeTakenSecondsRead;
 
-    std::cout << "MPI[" << nodeID << "][" << rank << "]: Read completed Throughput " << throughputMBps << " MBps"  << std::endl;
-
+    	std::cout << "MPI[" << nodeID << "][" << rank << "]: Read completed Throughput " << throughputMBps << " MBps"  << std::endl;
+	
+    } 
 
     MPI_Finalize();
 
