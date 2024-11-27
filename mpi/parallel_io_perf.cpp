@@ -6,7 +6,8 @@
 #include <chrono>
 
 // version beta 5
-//
+// Run:
+// mpirun -np <NB_Process> ./parallel_io_perf <linux_ID> <fileSize> [numIterations] [Filename]
 
 int main(int argc, char* argv[]) {
     MPI_Init(&argc, &argv);
