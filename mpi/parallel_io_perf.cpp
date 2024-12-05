@@ -6,8 +6,7 @@
 #include <chrono>
 
 // version beta 5
-// Run:
-// mpirun -np <NB_Process> ./parallel_io_perf <linux_ID> <fileSize> [numIterations] [Filename]
+//
 
 int main(int argc, char* argv[]) {
     MPI_Init(&argc, &argv);
@@ -85,7 +84,7 @@ int main(int argc, char* argv[]) {
     	std::cout << "MPI[" << nodeID << "][" << rank << "]: Write completed Throughput " << throughputMBps << " MBps"  << std::endl;
 
     	// Reopen the file for reading
-    	MPI_File_open(MPI_COMM_WORLD, "random.dat", MPI_MODE_RDONLY, MPI_INFO_NULL, &file);
+    	MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &file);
 
     	std::cout << "MPI[" << nodeID << "][" << rank << "]: Start Parallel Read in [" << filename << "] iteration [" << counter << "]"  << std::endl;
     	auto startRead = std::chrono::high_resolution_clock::now();
