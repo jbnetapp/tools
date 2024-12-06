@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
     std::string version = "beta 5" ;
     std::string Usage = "Usage:" + std::string(argv[0]) + " <node_ID> <sizeMB> [numIterations] [filename]";
 
-    if (argc < 3) {
+    if (argc < 4) {
         std::cerr << Usage  << std::endl;
 	MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
     } else {
@@ -60,11 +60,23 @@ int main(int argc, char* argv[]) {
     std::vector<char> data(chunkSize);
     std::random_device rd;
     std::mt19937 gen(rd());
+
+    auto memStart = std::chrono::high_resolution_clock::now();
     std::uniform_int_distribution<> dis(0, 255);
     for (long long i = 0; i < chunkSize; ++i) {
         data[i] = static_cast<char>(dis(gen));
     }
+    
+    MPI_Barrier(MPI_COMM_WORLD);
 
+    auto memStop = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = memStop - memStart;
+    double timeTakenSeconds = duration.count();
+    if (rank == 0 ) {
+        std::cout << "MPI[" << nodeID << "][" << rank << "]: memory chunk build duration [" << timeTakenSeconds << "]"  << std::endl;
+    }
+
+    auto loopStart = std::chrono::high_resolution_clock::now();
     for (int i = 0 ; i < numIterations ; i++ ) {
 	counter++;
     	// open the file for writing 
@@ -82,6 +94,8 @@ int main(int argc, char* argv[]) {
     	double throughputMBps = (chunkSize / (1024.0 * 1024)) / timeTakenSeconds;
 
     	std::cout << "MPI[" << nodeID << "][" << rank << "]: Write completed Throughput " << throughputMBps << " MBps"  << std::endl;
+    
+        MPI_Barrier(MPI_COMM_WORLD);
 
     	// Reopen the file for reading
     	MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &file);
@@ -100,6 +114,15 @@ int main(int argc, char* argv[]) {
     	std::cout << "MPI[" << nodeID << "][" << rank << "]: Read completed Throughput " << throughputMBps << " MBps"  << std::endl;
 	
     } 
+    
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    auto loopStop = std::chrono::high_resolution_clock::now();
+    duration = loopStop - loopStart;
+    timeTakenSeconds = duration.count();
+    if (rank == 0 ) {
+        std::cout << "MPI[" << nodeID << "][" << rank << "]: MPI IO duration [" << timeTakenSeconds << "]"  << std::endl;
+    }
 
     MPI_Finalize();
 
