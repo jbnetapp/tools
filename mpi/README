@@ -2,6 +2,12 @@ Install Open MPI in RHEL:
 # sudo yum install openmpi-devel
 # sudo yum install openmpi
 
+Check MPI version
+$ mpirun --version
+mpirun (Open MPI) 4.1.1
+
+Report bugs to http://www.open-mpi.org/community/help/
+
 Build and Run the test MPI validation Program
 $ mpic++ parallel_io.cpp -o parallel_io
 $ mpirun -np 6 parallel_io
