@@ -47,11 +47,13 @@ int main(int argc, char* argv[]) {
 	    filenameArg = "random.dat" ;
     }
 
-    filename = filenameArg + "." + std::to_string(nodeID) + std::to_string(rank) ; 
 
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    std::string filenameTmp = std::string(filenameArg) + "." + std::to_string(nodeID) + std::to_string(rank) ; 
+    filename = filenameTmp.c_str() ;
 
     MPI_File file;
 
