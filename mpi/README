@@ -15,8 +15,13 @@ $ mpirun -np 6 parallel_io
 Build the test MPI performance Program 
 $ mpic++ parallel_io_perf.cpp -o parallel_io_perf
 
+Set Environment variable (https://github.com/open-mpi/ompi/issues/4446)(https://github.com/open-mpi/ompi/issues/12345)
+$ export OMPI_MCA_btl=^openib
+$ export OMPI_MCA_fs_ufs_lock_algorithm=1
+
 to Run the MPI IO performance test:
 $ mpirun -np <NB_Process> ./parallel_io_perf <linux_ID> <fileSize> [numIterations] [Filename] 
+
 
 example: 
 Run 2 Process on linux host ID 2 and create random file of 500MB with 5 write/read iterations on file ./file.data
