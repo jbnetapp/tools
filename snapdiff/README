@@ -1,0 +1,47 @@
+- Install NetApp Perl SDK in /usr/lib/NetApp/perl 
+# ls -la /usr/lib/NetApp/perl
+total 13992
+drwxr-xr-x. 2 root root    4096 Dec 18 11:12 .
+drwxr-xr-x. 3 root root      18 Dec 18 11:12 ..
+-rw-r--r--. 1 root root   18828 Dec 18 11:12 DfmErrno.pm
+-rw-r--r--. 1 root root   16413 Dec 18 11:12 NaElement.pm
+-rw-r--r--. 1 root root   81816 Dec 18 11:12 NaErrno.pm
+-rw-r--r--. 1 root root   62455 Dec 18 11:12 NaServer.pm
+-rw-r--r--. 1 root root  405037 Dec 18 11:12 OCUMAPI.pm
+-rw-r--r--. 1 root root 2107825 Dec 18 11:12 OCUMClassicAPI.pm
+-rw-r--r--. 1 root root 2281705 Dec 18 11:12 Ontap7ModeAPI.pm
+-rw-r--r--. 1 root root 9313731 Dec 18 11:12 OntapClusterAPI.pm
+-rw-r--r--. 1 root root    3310 Dec 18 11:12 ONTAPILogParser.pm
+-rw-r--r--. 1 root root    5669 Dec 18 11:12 ONTAPITestContainer.pm
+-rw-r--r--. 1 root root    3658 Dec 18 11:12 SdkEnv.pm
+-rw-r--r--. 1 root root    2986 Dec 18 11:12 Test.pm
+
+- install the LWP::UserAgent module
+# yum install perl-libwww-perl
+
+install the XML::Parser module
+# yum install perl-App-cpanminus
+# yum install "perl(XML::LibXML)"
+# yum install expat-devel
+
+# perl -MCPAN -e shell
+cpan[1]> install XML::Parser
+cpan[1]> exit 
+
+[user1@rocky9]$ perl snapdiff.pl --help
+Config: linux
+INFO: No configuration File found [/home/user1/.NetApp/snapdiff.conf]
+
+Usage: snapdiff [options]
+
+All available options are:
+         --hostname     [HOSTNAME]
+         --login        [LOGIN]
+         --passwd       [PASSWD]
+         --volume       [VOLUME]
+         --snap1        [SNAP1]
+         --snap2        [SNAP2]
+         --debug        [0|1|2]
+         --protocol     [HTTP|HTTPS]
+         --port         [PORT]
+
