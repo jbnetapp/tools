@@ -42,6 +42,8 @@ yum install perl-ExtUtils-MakeMaker -y
 yum install policycoreutils-python -y
 
 yum install krb5-workstation krb5-libs -y
+yum install openldap-clients -y
+
 
 # change session timeo
 clean_and_exit "terminate" 0

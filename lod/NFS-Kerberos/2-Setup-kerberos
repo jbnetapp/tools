@@ -41,13 +41,34 @@ echo $PASSWD | realm join -U administrator dc1.demo.netapp.com
 realm list
 
 echo Check if AD user exists
-id user1@DEMO
+id user1@$DOMAIN
 [ $? -ne 0 ] && clean_and_exit "Error user1 not in AD " 1
-id user2@DEMO
+id user2@$DOMAIN
 [ $? -ne 0 ] && clean_and_exit "Error user2 not in AD " 1
+
+echo Check LDAP user exists 
+ldapsearch -LLL -H ldap://dc1.demo.netapp.com  -x -D "Administrator@demo.netapp.com" -b dc=demo,dc=netapp,dc=com -s sub "(uid=user1)" -w "$PASSWD"
+ldapsearch -LLL -H ldap://dc1.demo.netapp.com  -x -D "Administrator@demo.netapp.com" -b dc=demo,dc=netapp,dc=com -s sub "(uid=user2)" -w "$PASSWD"
 
 echo sssd Setup
 cp /etc/sssd/sssd.conf /etc/sssd/sssd.conf_$DATE
 cp ./sssd.conf  /etc/sssd/sssd.conf
 systemctl restart sssd
 sss_cache -E
+
+echo List cached Kerberos tickets
+klist -k
+
+echo Check Unix AD users
+id user1
+[ $? -ne 0 ] && clean_and_exit "Error user1 not in AD " 1
+id user2
+[ $? -ne 0 ] && clean_and_exit "Error user2 not in AD " 1
+
+echo Setup ONTAP kerberos
+CMD="kerberos realm create -vserver svm1_cluster1 -realm DEMO.NETAPP.COM -kdc-vendor Microsoft -kdc-ip 192.168.0.253 -kdc-port 88 -clock-skew 5 -adminserver-ip 192.168.0.253 -adminserver-port 749 -passwordserver-ip 192.168.0.253 -passwordserver-port 464 -adserver-name dc1 -adserver-ip 192.168.0.253"
+
+
+
+
+
