@@ -36,8 +36,9 @@ nslookup $HOSTNAME
 [ $? -ne 0 ] && clean_and_exit "Error no DNS entry for $HOSTNAME" 1
 
 echo  Realm
-realm discover dc1.demo.netapp.com
+realm discover -v dc1.demo.netapp.com
 echo $PASSWD | realm join -U administrator dc1.demo.netapp.com
+realm list
 
 echo Check if AD user exists
 id user1@DEMO
@@ -50,4 +51,3 @@ cp /etc/sssd/sssd.conf /etc/sssd/sssd.conf_$DATE
 cp ./sssd.conf  /etc/sssd/sssd.conf
 systemctl restart sssd
 sss_cache -E
- 
