@@ -64,11 +64,3 @@ id user1
 [ $? -ne 0 ] && clean_and_exit "Error user1 not in AD " 1
 id user2
 [ $? -ne 0 ] && clean_and_exit "Error user2 not in AD " 1
-
-echo Setup ONTAP kerberos
-CMD="kerberos realm create -vserver svm1_cluster1 -realm DEMO.NETAPP.COM -kdc-vendor Microsoft -kdc-ip 192.168.0.253 -kdc-port 88 -clock-skew 5 -adminserver-ip 192.168.0.253 -adminserver-port 749 -passwordserver-ip 192.168.0.253 -passwordserver-port 464 -adserver-name dc1 -adserver-ip 192.168.0.253"
-
-
-
-
-

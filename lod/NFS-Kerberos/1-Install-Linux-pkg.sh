@@ -18,6 +18,7 @@ check_var
 
 set -x
 #yum update -y
+yum install nfs-utils -y
 yum install ntpstat -y
 yum install tuned -y
 yum install grubby -y
