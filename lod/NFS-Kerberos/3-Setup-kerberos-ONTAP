@@ -64,11 +64,8 @@ sshpass -p $PASSWD ssh -l admin cluster1 "vserver name-mapping show -vserver $SV
 echo Check krb-unix mapping
 sshpass -p $PASSWD ssh -l admin cluster1 "set advanced; vserver services access-check name-mapping show -node cluster1-01 -vserver $SVM1 -direction krb-unix -name RHEL1\$@DEMO.NETAPP.COM"
 
-echo "Setup NFSv4 Domain"
+echo "Setup ONTAP NFSv4 Domain"
 sshpass -p $PASSWD ssh -l admin cluster1 vserver nfs modify -v4-id-domain $DOMAIN -vserver $SVM1
-cp /etc/idmapd.conf /etc/idmapd.conf_$DATE
-cp ./idmapd.conf /etc/idmapd.conf
-nfsidmap -c
 
 echo Create NFS / CIFS Volume
 sshpass -p $PASSWD ssh -l admin cluster1 vserver modify -vserver $SVM1 -aggr-list $AGGR_DATA_CL1 

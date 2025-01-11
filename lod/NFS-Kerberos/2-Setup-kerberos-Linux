@@ -64,3 +64,10 @@ id user1
 [ $? -ne 0 ] && clean_and_exit "Error user1 not in AD " 1
 id user2
 [ $? -ne 0 ] && clean_and_exit "Error user2 not in AD " 1
+
+
+echo "Setup ONTAP NFSv4 Domain"
+cp /etc/idmapd.conf /etc/idmapd.conf_$DATE
+cp ./idmapd.conf /etc/idmapd.conf
+nfsidmap -c
+systemctl restart nfs-idmapd

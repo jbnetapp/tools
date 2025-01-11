@@ -46,6 +46,3 @@ yum install policycoreutils-python -y
 
 yum install krb5-workstation krb5-libs -y
 yum install openldap-clients -y
-
-# change session timeo
-reboot
