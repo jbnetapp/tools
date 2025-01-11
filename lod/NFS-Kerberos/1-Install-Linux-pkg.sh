@@ -17,7 +17,9 @@ fi
 check_var
 
 set -x
-#yum update -y
+sudo timedatectl set-timezone Etc/UTC
+
+yum update -y
 yum install nfs-utils -y
 yum install ntpstat -y
 yum install tuned -y
@@ -45,6 +47,5 @@ yum install policycoreutils-python -y
 yum install krb5-workstation krb5-libs -y
 yum install openldap-clients -y
 
-
 # change session timeo
-clean_and_exit "terminate" 0
+reboot

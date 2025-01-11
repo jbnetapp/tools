@@ -58,23 +58,11 @@ echo "Check KDC Service Principal NFS-SVM1 with PowerShell: Get-ADComputer -Prop
 getent hosts NFS-SVM1.DEMO.NETAPP.COM
 [ $? -ne 0 ] && clean_and_exit "Error DNS entry NFS-SVM1 is missing" 1
 
-echo Create NFS / CIFS Volume
-sshpass -p $PASSWD ssh -l admin cluster1 vserver modify -vserver $SVM1 -aggr-list ""
-sshpass -p $PASSWD ssh -l admin cluster1 volume create -vserver $SVM1 -volume volnfs1 -security-style unix -state online -aggregate $AGGR_DATA_CL1  -junction-path /volnfs1
-sshpass -p $PASSWD ssh -l admin cluster1 volume create -vserver $SVM1 -volume volcifs1 -security-style ntfs -state online -aggregate $AGGR_DATA_CL1  -junction-path /volcifs1
-sshpass -p $PASSWD ssh -l admin cluster1 vserver cifs share create -share-name volnfs1 -path /volnfs1
-sshpass -p $PASSWD ssh -l admin cluster1 vserver cifs share create -share-name volcifs1 -path /volcifs1
-sshpass -p $PASSWD ssh -l admin cluster1 vserver cifs share show 
-
-sshpass -p $PASSWD ssh -l admin cluster1 export-policy create -policyname kerberos_default -vserver $SVM1 
-sshpass -p $PASSWD ssh -l admin cluster1 export-policy rule create -vserver $SVM1 -policyname kerberos_default -clientmatch 0.0.0.0/0 -rorule krb5p -rwrule krb5p -allow-suid true -allow-dev true -protocol nfs3,nfs4,cifs -superuser krb5p
-sshpass -p $PASSWD ssh -l admin cluster1 volume modify -volume volnfs1 -policy kerberos_default -vserver $SVM1
-sshpass -p $PASSWD ssh -l admin cluster1 volume modify -volume volcifs1 -policy kerberos_default -vserver $SVM1
-
-echo Creaet a name-mapping krb-unix rule 
-sshpass -p $PASSWD ssh -l admin cluster1 "vserver name-mapping create -vserver $SVM1 -direction krb-unix -position 1 -pattern (.+)\$@DEMO.NETAPP.COM -replacement root"
+Creaet a name-mapping krb-unix rule 
+sshpass -p $PASSWD ssh -l admin cluster1 "vserver name-mapping create -vserver $SVM1 -direction krb-unix -position 1 -pattern (.+)\\\$@DEMO.NETAPP.COM -replacement root"
+sshpass -p $PASSWD ssh -l admin cluster1 "vserver name-mapping show -vserver $SVM1 -direction krb-unix"
 echo Check krb-unix mapping
-sshpass -p $PASSWD ssh -l admin cluster1 "set advanced; vserver services access-check name-mapping show -node cluster1-01 -vserver $SVM1 -direction krb-unix -name RHEL1$@DEMO.NETAPP.COM"
+sshpass -p $PASSWD ssh -l admin cluster1 "set advanced; vserver services access-check name-mapping show -node cluster1-01 -vserver $SVM1 -direction krb-unix -name RHEL1\$@DEMO.NETAPP.COM"
 
 echo "Setup NFSv4 Domain"
 sshpass -p $PASSWD ssh -l admin cluster1 vserver nfs modify -v4-id-domain $DOMAIN -vserver $SVM1
@@ -82,9 +70,23 @@ cp /etc/idmapd.conf /etc/idmapd.conf_$DATE
 cp ./idmapd.conf /etc/idmapd.conf
 nfsidmap -c
 
-# kint init
+echo Create NFS / CIFS Volume
+sshpass -p $PASSWD ssh -l admin cluster1 vserver modify -vserver $SVM1 -aggr-list $AGGR_DATA_CL1 
+sshpass -p $PASSWD ssh -l admin cluster1 volume create -vserver $SVM1 -volume volnfs1 -security-style unix -state online -aggregate $AGGR_DATA_CL1  -junction-path /volnfs1
+sshpass -p $PASSWD ssh -l admin cluster1 volume create -vserver $SVM1 -volume volcifs1 -security-style ntfs -state online -aggregate $AGGR_DATA_CL1  -junction-path /volcifs1
+sshpass -p $PASSWD ssh -l admin cluster1 vserver cifs share create -share-name volnfs1 -path /volnfs1
+sshpass -p $PASSWD ssh -l admin cluster1 vserver cifs share create -share-name volcifs1 -path /volcifs1
+sshpass -p $PASSWD ssh -l admin cluster1 vserver cifs share show 
+
+echo Create Rules
+sshpass -p $PASSWD ssh -l admin cluster1 export-policy create -policyname kerberos_default -vserver $SVM1 
+sshpass -p $PASSWD ssh -l admin cluster1 export-policy rule create -vserver $SVM1 -policyname kerberos_default -clientmatch 0.0.0.0/0 -rorule krb5p -rwrule krb5p -allow-suid true -allow-dev true -protocol nfs3,nfs4,cifs -superuser krb5p
+sshpass -p $PASSWD ssh -l admin cluster1 volume modify -volume volnfs1 -policy kerberos_default -vserver $SVM1
+sshpass -p $PASSWD ssh -l admin cluster1 volume modify -volume volcifs1 -policy kerberos_default -vserver $SVM1
+
 kinit user1@DEMO.NETAPP.COM
 klist -kte
 [ ! -d /volnfs1 ] && mkdir /volnfs1
 [ ! -d /volcifs1 ] && mkdir /volcifs1
-mount -t nfs -o vers=4.2,sec=krb5p svm1:/volcifs2 /volcifs2
+mount -t nfs -o vers=4.2,sec=krb5p svm1:/volcifs1 /volcifs1
+mount -t nfs -o vers=4.2,sec=krb5p svm1:/volnfs1 /volnfs1
