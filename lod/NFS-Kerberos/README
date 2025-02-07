@@ -1,6 +1,23 @@
+----------------------------------------------------------------------------------------------------------------------
+SETUP
+----------------------------------------------------------------------------------------------------------------------
+Enter DNS manually 
+192.168.0.61 rhel1
+
+Kerberos IP NAME by PowerShell script
+192.168.0.131   NFS-svm1.demo.netapp.com (new)
+192.168.0.131   NFS-SVM1.demo.netapp.com (old)
+
+Lif name in the Setup.conf must be equivalent to the LFI name in LOD example:
+cluster1::> network interface show -vserver svm1 -service-policy default-data-files
+            Logical    Status     Network            Current       Current Is
+Vserver     Interface  Admin/Oper Address/Mask       Node          Port    Home
+----------- ---------- ---------- ------------------ ------------- ------- ----
+svm1
+            lif_svm1_818 up/up    192.168.0.131/24   cluster1-01   e0d     true
 
 ----------------------------------------------------------------------------------------------------------------------
-Must be check:
+Bug:
 ----------------------------------------------------------------------------------------------------------------------
 cluster1-01      ERROR         secd.nfsAuth.noNameMap: vserver (svm1) Cannot map UNIX name to CIFS name. Error: Get user credentials procedure failed
   [  0 ms] Determined UNIX id 0 is UNIX user 'root'
@@ -11,23 +28,4 @@ cluster1-01      ERROR         secd.nfsAuth.noNameMap: vserver (svm1) Cannot map
   [    13] Unable to map 'root'. No default Windows user defined.
 **[    13] FAILURE: Name mapping for UNIX user 'root' failed. No mapping found
 
-
 vserver nfs modify -ignore-nt-acl-for-root enabled
-
-----------------------------------------------------------------------------------------------------------------------
-WARNING
-----------------------------------------------------------------------------------------------------------------------
-Enter DNS
-192.168.0.61 rhel1
-
-Kerberos IP NAME:
-192.168.0.131   NFS-svm1.demo.netapp.com (new)
-192.168.0.131   NFS-SVM1.demo.netapp.com (old)
-
-Lif name in the Setup.conf must mache the LFI name of the LOD:
-cluster1::> network interface show -vserver svm1 -service-policy default-data-files
-            Logical    Status     Network            Current       Current Is
-Vserver     Interface  Admin/Oper Address/Mask       Node          Port    Home
------------ ---------- ---------- ------------------ ------------- ------- ----
-svm1
-            lif_svm1_818 up/up    192.168.0.131/24   cluster1-01   e0d     true
