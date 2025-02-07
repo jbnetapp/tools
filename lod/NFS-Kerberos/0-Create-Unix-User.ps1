@@ -35,7 +35,7 @@ New-ADUser -SamAccountName user3 -UserPrincipalName user3@DEMO.NETAPP.COM -Name 
 # Add DNS Entry for Kerberos IP (Mut be validated)
 $NFSKerberosName="NFS-" + $configHashTable["SVM1"]
 $SVMipAddress = [System.Net.Dns]::GetHostAddresses($configHashTable["SVM1"]).IPAddressToString
-$DCname = "DC1" + $configHashTable["DOMAIN"]
+$DCname = "DC1." + $configHashTable["DOMAIN"]
 Add-DnsServerResourceRecordA -Name $NFSKerberosName +  -IPv4Address $SVMipAddress -ZoneName $configHashTable["DOMAIN"] -ComputerName $DCname 
 $reverseZone = $SVMipAddress.split('.')[2] + "." + $SVMipAddress.split('.')[1] + "." + $SVMipAddress.split('.')[0] + ".in-addr.arpa"
 $reverseRecordName = $SVMipAddress.split('.')[3] 
