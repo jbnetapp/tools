@@ -37,7 +37,6 @@ $NFSKerberosName="NFS-" + $configHashTable["SVM1"]
 $SVMipAddress = [System.Net.Dns]::GetHostAddresses($configHashTable["SVM1"]).IPAddressToString
 $DCname = "DC1" + $configHashTable["DOMAIN"]
 Add-DnsServerResourceRecordA -Name $NFSKerberosName +  -IPv4Address $SVMipAddress -ZoneName $configHashTable["DOMAIN"] -ComputerName $DCname 
-$reverseZone = "0.168.192.in-addr.arpa"
 $reverseZone = $SVMipAddress.split('.')[2] + "." + $SVMipAddress.split('.')[1] + "." + $SVMipAddress.split('.')[0] + ".in-addr.arpa"
 $reverseRecordName = $SVMipAddress.split('.')[3] 
 Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $NFSKerberosName -ZoneName $reverseZone -ComputerName $DCname 

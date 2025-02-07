@@ -1,0 +1,19 @@
+
+----------------------------------------------------------------------------------------------------------------------
+Must be check:
+----------------------------------------------------------------------------------------------------------------------
+cluster1-01      ERROR         secd.nfsAuth.noNameMap: vserver (svm1) Cannot map UNIX name to CIFS name. Error: Get user credentials procedure failed
+  [  0 ms] Determined UNIX id 0 is UNIX user 'root'
+  [     1] Trying to map 'root' to Windows user 'root' using implicit mapping
+  [     2] Successfully connected to ip 192.168.0.253, port 445 using TCP
+  [     8] Successfully authenticated with DC dc1.demo.netapp.com
+  [    13] Could not find Windows name 'root'
+  [    13] Unable to map 'root'. No default Windows user defined.
+**[    13] FAILURE: Name mapping for UNIX user 'root' failed. No mapping found
+
+
+vserver nfs modify -ignore-nt-acl-for-root enabled
+
+----------------------------------------------------------------------------------------------------------------------
+IP NFS-CIFS
+----------------------------------------------------------------------------------------------------------------------
