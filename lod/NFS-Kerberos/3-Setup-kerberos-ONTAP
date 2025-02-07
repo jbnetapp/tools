@@ -26,7 +26,7 @@ sshpass -p $PASSWD ssh -l admin cluster1 version
 # Gets Free Data Aggregate
 echo Check for data Aggregate on each clusters 
 AGGR_DATA_CL1=`sshpass -p $PASSWD ssh -l admin cluster1 aggr show -root false |grep online |sort -k2 -u | tail -1 |awk '{print $1}'|tr -d '\r'`
-[ -z "$AGGR_DATA_CL1" ] && clean_and_exit "ERROR: No Data Aggregate found in cluster1"
+[ -z "$AGGR_DATA_CL1" ] && clean_and_exit "ERROR: No Data Aggregate found in cluster1" 1
 
 echo Setup LDAP
 sshpass -p $PASSWD ssh -l admin cluster1 ldap client create -client-config ldapclient1 -ldap-servers ${LDAP_SERVER} -schema AD-IDMU -port 389 -query-timeout 3 -min-bind-level anonymous -base-dn "{$LDAP_BASE_DN}" -base-scope subtree -use-start-tls false -session-security none -referral-enabled false -ldaps-enabled false -bind-dn administrator@${DOMAIN}
