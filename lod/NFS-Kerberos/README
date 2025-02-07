@@ -15,8 +15,16 @@ cluster1-01      ERROR         secd.nfsAuth.noNameMap: vserver (svm1) Cannot map
 vserver nfs modify -ignore-nt-acl-for-root enabled
 
 ----------------------------------------------------------------------------------------------------------------------
-IP NFS-CIFS
+WARNING
 ----------------------------------------------------------------------------------------------------------------------
 Kerberos IP NAME:
 192.168.0.131   NFS-svm1.demo.netapp.com (new)
-192.168.0.131   NFS-SVM1.demo.netapp.com
+192.168.0.131   NFS-SVM1.demo.netapp.com (old)
+
+Lif name in the Setup.conf must mache the LFI name of the LOD:
+cluster1::> network interface show -vserver svm1 -service-policy default-data-files
+            Logical    Status     Network            Current       Current Is
+Vserver     Interface  Admin/Oper Address/Mask       Node          Port    Home
+----------- ---------- ---------- ------------------ ------------- ------- ----
+svm1
+            lif_svm1_818 up/up    192.168.0.131/24   cluster1-01   e0d     true
