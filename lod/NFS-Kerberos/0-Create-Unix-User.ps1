@@ -47,6 +47,6 @@ Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $NFSKerbe
 
 # Add DNS Entry for Kerberos Linux IP
 Add-DnsServerResourceRecordA -Name $configHashTable["LINUX_HOSTNAME"] -IPv4Address $configHashTable["LINUX_IP"] -ZoneName $configHashTable["DOMAIN"] -ComputerName $DCname
-$reverseZone = $LINUX_IP.split('.')[2] + "." + $LINUX_IP.split('.')[1] + "." + $LINUX_IP.split('.')[0] + ".in-addr.arpa"
-$reverseRecordName = $LINUX_IP.split('.')[3]
+$reverseZone = $configHashTable["LINUX_IP"].split('.')[2] + "." + $configHashTable["LINUX_IP"].split('.')[1] + "." + $configHashTable["LINUX_IP"].split('.')[0] + ".in-addr.arpa"
+$reverseRecordName = $configHashTable["LINUX_IP"].split('.')[3]
 Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $configContent["LINUX_HOSTNAME"] -ZoneName $reverseZone -ComputerName $DCname
