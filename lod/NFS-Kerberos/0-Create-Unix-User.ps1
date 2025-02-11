@@ -58,7 +58,7 @@ $ptrRecords = Get-DnsServerResourceRecord -ComputerName $DCname -ZoneName $rever
 $matchingRecord = $ptrRecords | Where-Object { $_.RecordData.PtrDomainName -eq $NFSKerberosNameFQDN + "." }
 
 if ($matchingRecord) {
-    Write-Output "The 'PTR' record for $reverseRecordName exists in the $zoneName zone on $dnsServer."
+    Write-Output "The 'PTR' record for $reverseRecordName exists in the $reverseZone zone on $DCname."
 } else {
     Write-Output "Create a new PTR DNS entry"
 	Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $NFSKerberosNameFQDN -ZoneName $reverseZone -ComputerName $DCname
@@ -81,7 +81,7 @@ $LinuxNameFQDN=$configHashTable["LINUX_HOSTNAME"] + "." + $configHashTable["DOMA
 $ptrRecords = Get-DnsServerResourceRecord -ComputerName $DCname -ZoneName $reverseZone -Name $reverseRecordName -RRType "PTR" -ErrorAction SilentlyContinue
 $matchingRecord = $ptrRecords | Where-Object { $_.RecordData.PtrDomainName -eq $linuxNameFQDN + "." }
 if ($matchingRecord) {
-    Write-Output "The 'PTR' record for $reverseRecordName exists in the $zoneName zone on $dnsServer."
+    Write-Output "The 'PTR' record for $reverseRecordName exists in the $reverseZone zone on $DCname."
 } else {
     Write-Output "Create a new PTR DNS entry"
     Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $LinuxNameFQDN -ZoneName $reverseZone -ComputerName $DCname
