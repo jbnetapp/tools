@@ -55,7 +55,7 @@ $NFSKerberosNameFQDN=$NFSKerberosName + "." + $configHashTable["DOMAIN"]
 
 
 $ptrRecords = Get-DnsServerResourceRecord -ComputerName $DCname -ZoneName $reverseZone -Name $reverseRecordName -RRType "PTR" -ErrorAction SilentlyContinue
-$matchingRecord = $ptrRecords | Where-Object { $_.RecordData.PtrDomainName -eq $NFSKerberosNameFQDN }
+$matchingRecord = $ptrRecords | Where-Object { $_.RecordData.PtrDomainName -eq $NFSKerberosNameFQDN + "." }
 
 if ($matchingRecord) {
     Write-Output "The 'PTR' record for $recordName exists in the $zoneName zone on $dnsServer."
@@ -79,7 +79,7 @@ $reverseRecordName = $configHashTable["LINUX_IP"].split('.')[3]
 $LinuxNameFQDN=$configHashTable["LINUX_HOSTNAME"] + "." + $configHashTable["DOMAIN"]
 
 $ptrRecords = Get-DnsServerResourceRecord -ComputerName $DCname -ZoneName $reverseZone -Name $reverseRecordName -RRType "PTR" -ErrorAction SilentlyContinue
-$matchingRecord = $ptrRecords | Where-Object { $_.RecordData.PtrDomainName -eq $linuxNameFQDN }
+$matchingRecord = $ptrRecords | Where-Object { $_.RecordData.PtrDomainName -eq $linuxNameFQDN + "." }
 if ($matchingRecord) {
     Write-Output "The 'PTR' record for $recordName exists in the $zoneName zone on $dnsServer."
 } else {
