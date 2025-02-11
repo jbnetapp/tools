@@ -67,7 +67,8 @@ if ($matchingRecord) {
 # Add DNS Entry for Kerberos Linux IP
 $record = Get-DnsServerResourceRecord -ComputerName $DCname -ZoneName $configHashTable["DOMAIN"] -Name $configHashTable["LINUX_HOSTNAME"] -RRType "A" -ErrorAction SilentlyContinue
 if ($record) {
-    Write-Output "The 'A' record for $configHashTable["LINUX_HOSTNAME"] already exists on $DCname."
+    $hostname=$configHashTable["LINUX_HOSTNAME"]
+    Write-Output "The 'A' record for $hostname already exists on $DCname."
 } else {
     Write-Output "Create 'A' DNS entry"
     Add-DnsServerResourceRecordA -Name $configHashTable["LINUX_HOSTNAME"] -IPv4Address $configHashTable["LINUX_IP"] -ZoneName $configHashTable["DOMAIN"] -ComputerName $DCname
