@@ -38,12 +38,32 @@ New-ADUser -SamAccountName user3 -UserPrincipalName user3@DEMO.NETAPP.COM -Name 
 $NFSKerberosName="NFS-" + $configHashTable["SVM1"]
 $SVMipAddress = [System.Net.Dns]::GetHostAddresses($configHashTable["SVM1"]).IPAddressToString
 $DCname = "DC1." + $configHashTable["DOMAIN"]
-Add-DnsServerResourceRecordA -Name $NFSKerberosName -IPv4Address $SVMipAddress -ZoneName $configHashTable["DOMAIN"] -ComputerName $DCname 
+
+$record = Get-DnsServerResourceRecord -ComputerName $DCname -ZoneName $configHashTable["DOMAIN"] -Name $NFSKerberosName -RRType "A" -ErrorAction SilentlyContinue
+
+if ($record) {
+    Write-Output "The 'A' record for $NFSKerberosName already exists on $DCname."
+} else {
+    Write-Output "Create 'A' DNS entry"
+	Add-DnsServerResourceRecordA -Name $NFSKerberosName -IPv4Address $SVMipAddress -ZoneName $configHashTable["DOMAIN"] -ComputerName $DCname 
+}
+
+
 $reverseZone = $SVMipAddress.split('.')[2] + "." + $SVMipAddress.split('.')[1] + "." + $SVMipAddress.split('.')[0] + ".in-addr.arpa"
 $reverseRecordName = $SVMipAddress.split('.')[3] 
 $NFSKerberosNameFQDN=$NFSKerberosName + "." + $configHashTable["DOMAIN"]
 
-Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $NFSKerberosNameFQDN -ZoneName $reverseZone -ComputerName $DCname
+
+$record = Get-DnsServerResourceRecord -ComputerName $DCname -ZoneName $reverseZone -Name $reverseRecordName -RRType "PTR" -ErrorAction SilentlyContinue
+
+# Check if the record exists
+if ($record) {
+    Write-Output "The 'PTR' record for $recordName exists in the $zoneName zone on $dnsServer."
+} else {
+    Write-Output "Create a new PTR DNS entry"
+	Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $NFSKerberosNameFQDN -ZoneName $reverseZone -ComputerName $DCname
+
+}
 
 # Add DNS Entry for Kerberos Linux IP
 Add-DnsServerResourceRecordA -Name $configHashTable["LINUX_HOSTNAME"] -IPv4Address $configHashTable["LINUX_IP"] -ZoneName $configHashTable["DOMAIN"] -ComputerName $DCname
