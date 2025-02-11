@@ -49,4 +49,7 @@ Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $NFSKerbe
 Add-DnsServerResourceRecordA -Name $configHashTable["LINUX_HOSTNAME"] -IPv4Address $configHashTable["LINUX_IP"] -ZoneName $configHashTable["DOMAIN"] -ComputerName $DCname
 $reverseZone = $configHashTable["LINUX_IP"].split('.')[2] + "." + $configHashTable["LINUX_IP"].split('.')[1] + "." + $configHashTable["LINUX_IP"].split('.')[0] + ".in-addr.arpa"
 $reverseRecordName = $configHashTable["LINUX_IP"].split('.')[3]
-Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $configContent["LINUX_HOSTNAME"] -ZoneName $reverseZone -ComputerName $DCname
+
+$LinuxNameFQDN=$configHashTable["LINUX_HOSTNAME"] + "." + $configHashTable["DOMAIN"]
+
+Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $LinuxNameFQDN -ZoneName $reverseZone -ComputerName $DCname
