@@ -54,21 +54,34 @@ $reverseRecordName = $SVMipAddress.split('.')[3]
 $NFSKerberosNameFQDN=$NFSKerberosName + "." + $configHashTable["DOMAIN"]
 
 
-$record = Get-DnsServerResourceRecord -ComputerName $DCname -ZoneName $reverseZone -Name $reverseRecordName -RRType "PTR" -ErrorAction SilentlyContinue
+$ptrRecords = Get-DnsServerResourceRecord -ComputerName $DCname -ZoneName $reverseZone -Name $reverseRecordName -RRType "PTR" -ErrorAction SilentlyContinue
+$matchingRecord = $ptrRecords | Where-Object { $_.RecordData.PtrDomainName -eq $NFSKerberosNameFQDN }
 
-# Check if the record exists
-if ($record) {
+if ($matchingRecord) {
     Write-Output "The 'PTR' record for $recordName exists in the $zoneName zone on $dnsServer."
 } else {
     Write-Output "Create a new PTR DNS entry"
 	Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $NFSKerberosNameFQDN -ZoneName $reverseZone -ComputerName $DCname
-
 }
 
 # Add DNS Entry for Kerberos Linux IP
-Add-DnsServerResourceRecordA -Name $configHashTable["LINUX_HOSTNAME"] -IPv4Address $configHashTable["LINUX_IP"] -ZoneName $configHashTable["DOMAIN"] -ComputerName $DCname
+$record = Get-DnsServerResourceRecord -ComputerName $DCname -ZoneName $configHashTable["DOMAIN"] -Name $configHashTable["LINUX_HOSTNAME"] -RRType "A" -ErrorAction SilentlyContinue
+if ($record) {
+    Write-Output "The 'A' record for $configHashTable["LINUX_HOSTNAME"] already exists on $DCname."
+} else {
+    Write-Output "Create 'A' DNS entry"
+    Add-DnsServerResourceRecordA -Name $configHashTable["LINUX_HOSTNAME"] -IPv4Address $configHashTable["LINUX_IP"] -ZoneName $configHashTable["DOMAIN"] -ComputerName $DCname
+}
+
 $reverseZone = $configHashTable["LINUX_IP"].split('.')[2] + "." + $configHashTable["LINUX_IP"].split('.')[1] + "." + $configHashTable["LINUX_IP"].split('.')[0] + ".in-addr.arpa"
 $reverseRecordName = $configHashTable["LINUX_IP"].split('.')[3]
 $LinuxNameFQDN=$configHashTable["LINUX_HOSTNAME"] + "." + $configHashTable["DOMAIN"]
 
-Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $LinuxNameFQDN -ZoneName $reverseZone -ComputerName $DCname
+$ptrRecords = Get-DnsServerResourceRecord -ComputerName $DCname -ZoneName $reverseZone -Name $reverseRecordName -RRType "PTR" -ErrorAction SilentlyContinue
+$matchingRecord = $ptrRecords | Where-Object { $_.RecordData.PtrDomainName -eq $linuxNameFQDN }
+if ($matchingRecord) {
+    Write-Output "The 'PTR' record for $recordName exists in the $zoneName zone on $dnsServer."
+} else {
+    Write-Output "Create a new PTR DNS entry"
+    Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $LinuxNameFQDN -ZoneName $reverseZone -ComputerName $DCname
+}
