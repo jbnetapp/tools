@@ -40,6 +40,10 @@ check_var(){
 [ -z "$ROUTER" ] && clean_and_exit "Error variable not defined: ROUTER" 255
 [ -z "$DOMAIN" ] && clean_and_exit "Error variable not defined: DOMAIN" 255
 [ -z "$NAME_SERVER" ] && clean_and_exit "Error variable not defined: NAME_SERVER" 255
+[ -z "$LDAP_SERVER" ] && clean_and_exit "Error variable not defined: LDAP_SERVER" 255
+[ -z "$LDAP_BASE_DN" ] && clean_and_exit "Error variable not defined: LDAP_BASE_DN" 255
+[ -z "$LINUX_HOSTNAME" ] && clean_and_exit "Error variable not defined: LINUX_HOSTNAME" 255
+[ -z "$LINUX_IP" ] && clean_and_exit "Error variable not defined: LINUX_IP" 255
 [ -z "$CIFS_USER" ] && clean_and_exit "Error variable not defined: CIFS_USER" 255
 [ -z "$S3_USER" ] && clean_and_exit "Error variable not defined: S3_USER" 255
 [ -z "$SVM1" ] && clean_and_exit "Error variable not defined: SVM1" 255

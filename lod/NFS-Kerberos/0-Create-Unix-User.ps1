@@ -20,6 +20,8 @@ foreach ($line in $configContent) {
 }
 $configHashTable["SVM1"]
 $configHashTable["DOMAIN"]
+$configHashTable["LINUX_HOSTNAME"]
+$configHashTable["LINUX_IP"]
 
 New-ADGroup -Name Unix -GroupScope DomainLocal -OtherAttributes @{'gidnumber'='10001'}
 Get-ADGroup Unix -Properties gidNumber
@@ -32,7 +34,7 @@ New-ADUser -SamAccountName user2 -UserPrincipalName user2@DEMO.NETAPP.COM -Name 
 
 New-ADUser -SamAccountName user3 -UserPrincipalName user3@DEMO.NETAPP.COM -Name user3 -AccountPassword $password -OtherAttributes @{'uid'="user3";'uidNumber'="10003";'gidNumber'="10001";'unixHomeDirectory'='/home/user3';'loginShell'='/bin/bash'} -Enabled 1 -PasswordNeverExpires 1
 
-# Add DNS Entry for Kerberos IP (Mut be validated)
+# Add DNS Entry for Kerberos SVM IP
 $NFSKerberosName="NFS-" + $configHashTable["SVM1"]
 $SVMipAddress = [System.Net.Dns]::GetHostAddresses($configHashTable["SVM1"]).IPAddressToString
 $DCname = "DC1." + $configHashTable["DOMAIN"]
@@ -42,3 +44,9 @@ $reverseRecordName = $SVMipAddress.split('.')[3]
 $NFSKerberosNameFQDN=$NFSKerberosName + "." + $configHashTable["DOMAIN"]
 
 Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $NFSKerberosNameFQDN -ZoneName $reverseZone -ComputerName $DCname
+
+# Add DNS Entry for Kerberos Linux IP
+Add-DnsServerResourceRecordA -Name $configHashTable["LINUX_HOSTNAME"] -IPv4Address $configHashTable["LINUX_IP"] -ZoneName $configHashTable["DOMAIN"] -ComputerName $DCname
+$reverseZone = $LINUX_IP.split('.')[2] + "." + $LINUX_IP.split('.')[1] + "." + $LINUX_IP.split('.')[0] + ".in-addr.arpa"
+$reverseRecordName = $LINUX_IP.split('.')[3]
+Add-DnsServerResourceRecordPtr -Name $reverseRecordName -PtrDomainName $configContent["LINUX_HOSTNAME"] -ZoneName $reverseZone -ComputerName $DCname
