@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+set -x
+VERSION=1.0
+DIRNAME=`dirname $0`
+CONFIG_FILE=${DIRNAME}/Setup.conf
+FUNCTIONS_FILE=${DIRNAME}/functions.sh
+
+if [ ! -f $CONFIG_FILE ] ; then
+        echo "ERROR: Unable to read $CONFIG_FILE"
+        exit 1
+fi
+
+. $CONFIG_FILE
+. $FUNCTIONS_FILE
+
+check_var
+
+set -x
+DATE=`date +'%Y%m%d%H%M%S'`
+
+# Check Connection
+check_ssh_keyhost cluster1
+sshpass -p $PASSWD ssh -l admin cluster1 version 
+
+# Gets Free Data Aggregate
+echo Check for data Aggregate on each clusters 
+AGGR_DATA_CL1=`sshpass -p $PASSWD ssh -l admin cluster1 aggr show -root false |grep online |sort -k2 -u | tail -1 |awk '{print $1}'|tr -d '\r'`
+[ -z "$AGGR_DATA_CL1" ] && clean_and_exit "ERROR: No Data Aggregate found in cluster1" 1
+
+
+#
+echo Create CIFS LOGs volumes
+sshpass -p $PASSWD ssh -l admin cluster1 vserver modify -vserver $SVM1 -aggr-list $AGGR_DATA_CL1 
+sshpass -p $PASSWD ssh -l admin cluster1 volume create -vserver $SVM1 -volume audit_log -security-style ntfs -state online -aggregate $AGGR_DATA_CL1  -junction-path /audit_log -size 10G
+sshpass -p $PASSWD ssh -l admin cluster1 vserver cifs share create -share-name audit_log -path /audit_log
+sshpass -p $PASSWD ssh -l admin cluster1 vserver cifs share show 
+
+#
+echo Setup Auditlog
+sshpass -p $PASSWD ssh -l admin cluster1 vserver audit create -vserver $SVM1 -destination /audit_log -rotate-size 100MB -rotate-limit 10 -event file-ops -format xml
+sshpass -p $PASSWD ssh -l admin cluster1 vserver audit show -vserver $SVM1
+
+#
+echo Configure SACLs
+sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory ntfs create -vserver $SVM1 -ntfs-sd auditing-sd -owner Administrator
+sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory ntfs sacl add -vserver $SVM1 -ntfs-sd auditing-sd -access-type success -account Everyone -rights full-control -apply-to this-folder,sub-folders,files
+sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory policy create -vserver $SVM1 -policy-name auditing-policy
+sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory policy task add -policy-name auditing-policy -vserver $SVM1 -path /volcifs1 -index-num 1 -ntfs-sd auditing-sd -ntfs-mode propagate
+sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory apply -policy-name auditing-policy -vserver $SVM1
+sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory show -vserver $SVM1 /volcifs1
+
+#
+echo enable audit log
+sshpass -p $PASSWD ssh -l admin cluster1 vserver audit enable -vserver $SVM1 
+
+#
+echo enable NFS4 ACL
+sshpass -p $PASSWD ssh -l admin cluster1 vserver nfs modify -vserver $SVM1 -v4.0-acl enabled
+sshpass -p $PASSWD ssh -l admin cluster1 vserver nfs modify -vserver $SVM1 -v4.1-acl enabled
+
+#
+echo Mount audit log
+[ ! -d /audit_log ] && mkdir /audit_log
+mount -t nfs -o vers=4.2 $SVM1:/audit_log /audit_log
+xmllint --format /audit_log/audit_svm1_last.xml
