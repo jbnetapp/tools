@@ -28,4 +28,12 @@ cluster1-01      ERROR         secd.nfsAuth.noNameMap: vserver (svm1) Cannot map
   [    13] Unable to map 'root'. No default Windows user defined.
 **[    13] FAILURE: Name mapping for UNIX user 'root' failed. No mapping found
 
+try:
+kdestroy -A
+kinit
+or
+vserver nfs modify -vserver svm1 -default-win-user <username>
+or
+vserver name-mapping create -vserver svm1 -direction unix-win -position 2 -pattern root -replacement <username1>
+or
 vserver nfs modify -ignore-nt-acl-for-root enabled

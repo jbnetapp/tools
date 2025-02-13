@@ -19,8 +19,9 @@ check_var
 set -x
 sudo timedatectl set-timezone Etc/UTC
 
-yum update -y
+#yum update -y
 yum install nfs-utils -y
+yum install nfs4-acl-tools -y
 yum install ntpstat -y
 yum install tuned -y
 yum install grubby -y
@@ -31,8 +32,8 @@ yum install device-mapper-multipath -y
 # packages require for Mediator
 yum install openssl -y
 yum install openssl-devel -y 
-yum install gcc -y 
-yum install make -y 
+#yum install gcc -y
+#yum install make -y
 yum install redhat-lsb-core -y 
 yum install patch -y 
 yum install bzip2 -y 

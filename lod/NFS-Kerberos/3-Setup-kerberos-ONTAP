@@ -89,7 +89,8 @@ sshpass -p $PASSWD ssh -l admin cluster1 volume modify -volume volcifs1 -policy 
 
 kinit user1@DEMO.NETAPP.COM
 klist -kte
+klist -l
 [ ! -d /volnfs1 ] && mkdir /volnfs1
 [ ! -d /volcifs1 ] && mkdir /volcifs1
-mount -t nfs -o vers=4.2,sec=krb5p svm1:/volcifs1 /volcifs1
-mount -t nfs -o vers=4.2,sec=krb5p svm1:/volnfs1 /volnfs1
+mount -t nfs -o vers=4.1,sec=krb5p $SVM1:/volcifs1 /volcifs1
+mount -t nfs -o vers=4.1,sec=krb5p $SVM1:/volnfs1 /volnfs1
