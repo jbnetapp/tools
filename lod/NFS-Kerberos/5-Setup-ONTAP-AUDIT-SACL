@@ -59,8 +59,18 @@ echo enable NFS4 ACL
 sshpass -p $PASSWD ssh -l admin cluster1 vserver nfs modify -vserver $SVM1 -v4.0-acl enabled
 sshpass -p $PASSWD ssh -l admin cluster1 vserver nfs modify -vserver $SVM1 -v4.1-acl enabled
 
+# Set NFS AUDIT ACL FLAG
+nfs4_setfacl -R -a U:fdS:EVERYONE@:rwaDdxtTnNcCyo /volnfs1
+nfs4_getfacl /volnfs1/
+
+# ReMount after NFS SETFACL
+umount /volnfs1
+mount -t nfs -o vers=4.1,sec=krb5p $SVM1:/volnfs1 /volnfs1
+
 #
 echo Mount audit log
 [ ! -d /audit_log ] && mkdir /audit_log
 mount -t nfs -o vers=4.2 $SVM1:/audit_log /audit_log
+
+# Read the XLM AUDIT FILE
 xmllint --format /audit_log/audit_svm1_last.xml
