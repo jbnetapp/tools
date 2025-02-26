@@ -42,11 +42,12 @@ sshpass -p $PASSWD ssh -l admin cluster1 vserver audit create -vserver $SVM1 -de
 sshpass -p $PASSWD ssh -l admin cluster1 vserver audit show -vserver $SVM1
 
 #
-echo Configure SACLs
-sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory ntfs create -vserver $SVM1 -ntfs-sd auditing-sd -owner Administrator
-sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory ntfs sacl add -vserver $SVM1 -ntfs-sd auditing-sd -access-type success -account Everyone -rights full-control -apply-to this-folder,sub-folders,files
+echo Configure SACL using SLAG
+#sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory ntfs create -vserver $SVM1 -ntfs-sd auditing-sd -owner Administrator
+sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory ntfs create -vserver $SVM1 -ntfs-sd auditing-sd
+sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory ntfs sacl add -vserver $SVM1 -ntfs-sd auditing-sd -access-type success -account Everyone -advanced-rights write-data,append-data,write-ea,write-attr,delete,write-perm,write-owner -apply-to this-folder,sub-folders,files
 sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory policy create -vserver $SVM1 -policy-name auditing-policy
-sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory policy task add -policy-name auditing-policy -vserver $SVM1 -path /volcifs1 -index-num 1 -ntfs-sd auditing-sd -ntfs-mode propagate
+sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory policy task add -policy-name auditing-policy -vserver $SVM1 -path /volcifs1 -index-num 1 -ntfs-sd auditing-sd -ntfs-mode propagate -access-control slag
 sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory apply -policy-name auditing-policy -vserver $SVM1
 sshpass -p $PASSWD ssh -l admin cluster1 vserver security file-directory show -vserver $SVM1 /volcifs1
 
@@ -70,7 +71,7 @@ mount -t nfs -o vers=4.1,sec=krb5p $SVM1:/volnfs1 /volnfs1
 #
 echo Mount audit log
 [ ! -d /audit_log ] && mkdir /audit_log
-mount -t nfs -o vers=4.2 $SVM1:/audit_log /audit_log
+mount -t nfs -o vers=4.1 $SVM1:/audit_log /audit_log
 
 # Read the XLM AUDIT FILE
 xmllint --format /audit_log/audit_svm1_last.xml
