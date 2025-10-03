@@ -1,5 +1,7 @@
 #!/bin/bash
 set -x
+min=10
+max=1000
 RANDOM=$$
 for dir in {1..10};
   do
@@ -13,32 +15,34 @@ for dir in {1..10};
         echo "Dir - $dir; Sub_Dir - $sub_dir";
           for count in {1..10};
             do
+              random_count=$(( RANDOM % (max - min + 1) + min ))
+              dd if=/dev/urandom of=src_file bs=32K count=$random_count
               rand=$RANDOM
-              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.pdf bs=4k count=256 iflag=fullblock "
+              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.pdf bs=32k "
               echo "CMD - $cmd";
               $cmd 2> /dev/null
-              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.jpg bs=4k count=256 iflag=fullblock "
+              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.jpg bs=32k "
               echo "CMD - $cmd";
               $cmd 2> /dev/null
-              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.png bs=4k count=256 iflag=fullblock "
+              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.png bs=32k "
               echo "CMD - $cmd";
               $cmd 2> /dev/null
-              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.txt bs=4k count=256 iflag=fullblock "
+              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.txt bs=32k "
               echo "CMD - $cmd";
               $cmd 2> /dev/null
-              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.html bs=4k count=256 iflag=fullblock "
+              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.html bs=32k "
               echo "CMD - $cmd";
               $cmd 2> /dev/null
-              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.mp4 bs=4k count=256 iflag=fullblock "
+              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.mp4 bs=32k "
               echo "CMD - $cmd";
               $cmd 2> /dev/null
-              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.doc bs=4k count=256 iflag=fullblock "
+              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.doc bs=32k "
               echo "CMD - $cmd";
               $cmd 2> /dev/null
-              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.gif bs=4k count=256 iflag=fullblock "
+              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.gif bs=32k "
               echo "CMD - $cmd";
               $cmd 2> /dev/null
-              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.xyz bs=4k count=256 iflag=fullblock "
+              cmd="dd if=src_file of=$sub_dir/test_file_$rand.$count.xyz bs=32k "
               echo "CMD - $cmd";
               $cmd 2> /dev/null
           done
