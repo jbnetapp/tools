@@ -20,6 +20,7 @@ if (!(Test-Path $LogPath)) {
 }
 
 Write-Host "Starting high-performance I/O test with append operations..." -ForegroundColor Green
+Write-Host "LogPath: $LogPath" -ForegroundColor Yellow
 Write-Host "Threads: $ThreadCount" -ForegroundColor Yellow
 Write-Host "Total writes per thread: $TotalWrites" -ForegroundColor Yellow
 Write-Host "Write size: $WriteSize bytes" -ForegroundColor Yellow
