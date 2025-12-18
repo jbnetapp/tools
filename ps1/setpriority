@@ -1,0 +1,79 @@
+# Add this function to your script
+function Set-ProcessPriority {
+    param(
+        $Process,
+        [string]$Priority
+    )
+    
+    try {
+        $validPriorities = @{
+            'L' = 'Idle'
+            'B' = 'BelowNormal'
+            'N' = 'Normal'
+            'A' = 'AboveNormal'
+            'H' = 'High'
+            'R' = 'RealTime'
+        }
+        
+        if ($validPriorities.ContainsKey($Priority.ToUpper())) {
+            $priorityClass = $validPriorities[$Priority.ToUpper()]
+            $Process.PriorityClass = $priorityClass
+            Write-TraceOutput "Priority changed to: $priorityClass" "Green"
+            return $true
+        } else {
+            Write-TraceOutput "Invalid priority. Use L(ow), B(elow), N(ormal), A(bove), H(igh), R(ealtime)" "Red"
+            return $false
+        }
+    } catch {
+        Write-TraceOutput "Error changing priority: $_" "Red"
+        return $false
+    }
+}
+
+# Update the Get-KeyInput function to include priority changes
+function Get-KeyInput {
+    if ([Console]::KeyAvailable) {
+        $key = [Console]::ReadKey($true)
+        
+        switch ($key.Key) {
+            'Q' { return 'quit' }
+            'F' { 
+                $script:showFiles = -not $script:showFiles
+                $status = if($script:showFiles){'ON'}else{'OFF'}
+                Write-TraceOutput "File activity: $status" "Yellow"
+                return 'continue'
+            }
+            'N' { 
+                $script:showNetwork = -not $script:showNetwork
+                $status = if($script:showNetwork){'ON'}else{'OFF'}
+                Write-TraceOutput "Network connections: $status" "Yellow"
+                return 'continue'
+            }
+            'M' { 
+                $script:showModules = -not $script:showModules
+                $status = if($script:showModules){'ON'}else{'OFF'}
+                Write-TraceOutput "Modules: $status" "Yellow"
+                return 'continue'
+            }
+            'P' {
+                # Priority change mode
+                Write-TraceOutput "Priority change - Enter: L(ow), B(elow), N(ormal), A(bove), H(igh), R(ealtime)" "Yellow"
+                return 'priority'
+            }
+        }
+        
+        # Handle + and - keys for refresh interval
+        if ($key.KeyChar -eq '+' -or $key.Key.ToString() -eq 'OemPlus') {
+            $script:refreshInterval = [Math]::Max($script:refreshInterval - 1, 1)
+            Write-TraceOutput "Refresh interval: $($script:refreshInterval)s" "Yellow"
+            return 'continue'
+        }
+        
+        if ($key.KeyChar -eq '-' -or $key.Key.ToString() -eq 'OemMinus') {
+            $script:refreshInterval = [Math]::Min($script:refreshInterval + 1, 30)
+            Write-TraceOutput "Refresh interval: $($script:refreshInterval)s" "Yellow"
+            return 'continue'
+        }
+    }
+    return 'continue'
+}
