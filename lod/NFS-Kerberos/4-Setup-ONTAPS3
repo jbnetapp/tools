@@ -38,5 +38,5 @@ read
 
 sshpass -p $PASSWD ssh -l admin cluster1 vserver object-store-server group create -vserver svm1 -name users  -users user1,user2 -policies FullAccess
 sshpass -p $PASSWD ssh -l admin cluster1 vserver object-store-server bucket create -vserver svm1 -bucket volnfs1 -type nas -nas-path /volnfs1
-sshpass -p $PASSWD ssh -l admin cluster1 vserver object-store-server bucket create -vserver svm1 -bucket volcif1 -type nas -nas-path /volcifs1
+sshpass -p $PASSWD ssh -l admin cluster1 vserver object-store-server bucket create -vserver svm1 -bucket volcifs1 -type nas -nas-path /volcifs1
 sshpass -p $PASSWD ssh -l admin cluster1 vserver object-store-server bucket create -vserver svm1 -bucket bucket1 -type s3 -size 10GB
