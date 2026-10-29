@@ -1,0 +1,57 @@
+set -confirmations off
+
+### data1 volumes
+vol modify -vserver svm1 -volume vol29  -size 79995m
+vol modify -vserver svm1 -volume vol59  -size 28443m
+vol modify -vserver svm1 -volume vol1_a -size 652m
+vol modify -vserver svm1 -volume vol2_a -size 487m
+vol modify -vserver svm1 -volume vol0_a -size 1520m
+vol modify -vserver svm1 -volume vol1_b -size 435m
+vol modify -vserver svm1 -volume vol44  -size 218m
+vol modify -vserver svm1 -volume vol18  -size 66m
+vol modify -vserver svm1 -volume vol17  -size 20m
+
+### data2 volumes
+vol modify -vserver svm1 -volume vol26   -size 12444m
+vol modify -vserver svm1 -volume vol60   -size 10000m
+vol modify -vserver svm1 -volume vol32   -size 8889m
+vol modify -vserver svm1 -volume vol2_b  -size 1737m
+vol modify -vserver svm1 -volume vol3    -size 2171m
+vol modify -vserver svm1 -volume vol5    -size 1433m
+vol modify -vserver svm1 -volume vol9    -size 1737m
+vol modify -vserver svm1 -volume vol56   -size 1737m
+vol modify -vserver svm1 -volume vol16   -size 869m
+vol modify -vserver svm1 -volume vol34   -size 652m
+vol modify -vserver svm1 -volume vol55   -size 1086m
+vol modify -vserver svm1 -volume vol0_b  -size 1520m
+vol modify -vserver svm1 -volume vol28   -size 999m
+vol modify -vserver svm1 -volume vol20   -size 305m
+vol modify -vserver svm1 -volume vol27   -size 1737m
+vol modify -vserver svm1 -volume vol52   -size 240m
+vol modify -vserver svm1 -volume vol14   -size 348m
+vol modify -vserver svm1 -volume vol53   -size 348m
+vol modify -vserver svm1 -volume vol57   -size 652m
+vol modify -vserver svm1 -volume vol10   -size 196m
+vol modify -vserver svm1 -volume vol19   -size 218m
+vol modify -vserver svm1 -volume vol25   -size 487m
+vol modify -vserver svm1 -volume vol54   -size 348m
+vol modify -vserver svm1 -volume vol24   -size 565m
+vol modify -vserver svm1 -volume vol30   -size 1737m
+vol modify -vserver svm1 -volume vol49   -size 1303m
+vol modify -vserver svm1 -volume vol13   -size 131m
+vol modify -vserver svm1 -volume vol11   -size 196m
+vol modify -vserver svm1 -volume vol51   -size 66m
+vol modify -vserver svm1 -volume vol15   -size 44m
+vol modify -vserver svm1 -volume vol31   -size 218m
+vol modify -vserver svm1 -volume vol45   -size 88m
+vol modify -vserver svm1 -volume vol58   -size 88m
+vol modify -vserver svm1 -volume vol35   -size 66m
+vol modify -vserver svm1 -volume vol8    -size 27m
+vol modify -vserver svm1 -volume vol46   -size 1086m
+vol modify -vserver svm1 -volume vol33   -size 75m
+vol modify -vserver svm1 -volume vol48   -size 2605m
+vol modify -vserver svm1 -volume vol36   -size 53m
+vol modify -vserver svm1 -volume vol37   -size 31m
+vol modify -vserver svm1 -volume volfj13 -size 44m
+
+set -confirmations on

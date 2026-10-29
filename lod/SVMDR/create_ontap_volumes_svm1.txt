@@ -1,0 +1,107 @@
+set -confirmations off
+
+### Aggregate data1
+vol create -vserver svm1 -volume vol29  -aggregate data1 -size 49445m -security-style ntfs -snapshot-policy none -junction-path /vol29
+vserver cifs share create -vserver svm1 -share-name vol29 -path /vol29
+vol create -vserver svm1 -volume vol59  -aggregate data1 -size 17896m -security-style ntfs -snapshot-policy none -junction-path /vol59
+vserver cifs share create -vserver svm1 -share-name vol59 -path /vol59
+vol create -vserver svm1 -volume vol1_a -aggregate data1 -size 350m -security-style ntfs -snapshot-policy none -junction-path /vol1_a
+vserver cifs share create -vserver svm1 -share-name vol1_a -path /vol1_a
+vol create -vserver svm1 -volume vol2_a -aggregate data1 -size 309m -security-style ntfs -snapshot-policy none -junction-path /vol2_a
+vserver cifs share create -vserver svm1 -share-name vol2_a -path /vol2_a
+vol create -vserver svm1 -volume vol0_a -aggregate data1 -size 313m -security-style ntfs -snapshot-policy none -junction-path /vol0_a
+vserver cifs share create -vserver svm1 -share-name vol0_a -path /vol0_a
+vol create -vserver svm1 -volume vol1_b -aggregate data1 -size 108m -security-style ntfs -snapshot-policy none -junction-path /vol1_b
+vserver cifs share create -vserver svm1 -share-name vol1_b -path /vol1_b
+vol create -vserver svm1 -volume vol44  -aggregate data1 -size 37m -security-style ntfs -snapshot-policy none -junction-path /vol44
+vserver cifs share create -vserver svm1 -share-name vol44 -path /vol44
+vol create -vserver svm1 -volume vol18  -aggregate data1 -size 30m -security-style ntfs -snapshot-policy none -junction-path /vol18
+vserver cifs share create -vserver svm1 -share-name vol18 -path /vol18
+vol create -vserver svm1 -volume vol17  -aggregate data1 -size 20m -security-style ntfs -snapshot-policy none -junction-path /vol17
+vserver cifs share create -vserver svm1 -share-name vol17 -path /vol17
+
+### Aggregate data2
+vol create -vserver svm1 -volume vol26  -aggregate data2 -size 7987m -security-style ntfs -snapshot-policy none -junction-path /vol26
+vserver cifs share create -vserver svm1 -share-name vol26 -path /vol26
+vol create -vserver svm1 -volume vol60  -aggregate data2 -size 4229m -security-style ntfs -snapshot-policy none -junction-path /vol60
+vserver cifs share create -vserver svm1 -share-name vol60 -path /vol60
+vol create -vserver svm1 -volume vol32  -aggregate data2 -size 1881m -security-style ntfs -snapshot-policy none -junction-path /vol32
+vserver cifs share create -vserver svm1 -share-name vol32 -path /vol32
+vol create -vserver svm1 -volume vol2_b -aggregate data2 -size 1044m -security-style ntfs -snapshot-policy none -junction-path /vol2_b
+vserver cifs share create -vserver svm1 -share-name vol2_b -path /vol2_b
+vol create -vserver svm1 -volume vol3   -aggregate data2 -size 798m -security-style ntfs -snapshot-policy none -junction-path /vol3
+vserver cifs share create -vserver svm1 -share-name vol3 -path /vol3
+vol create -vserver svm1 -volume vol5   -aggregate data2 -size 808m -security-style ntfs -snapshot-policy none -junction-path /vol5
+vserver cifs share create -vserver svm1 -share-name vol5 -path /vol5
+vol create -vserver svm1 -volume vol9   -aggregate data2 -size 594m -security-style ntfs -snapshot-policy none -junction-path /vol9
+vserver cifs share create -vserver svm1 -share-name vol9 -path /vol9
+vol create -vserver svm1 -volume vol56  -aggregate data2 -size 490m -security-style ntfs -snapshot-policy none -junction-path /vol56
+vserver cifs share create -vserver svm1 -share-name vol56 -path /vol56
+vol create -vserver svm1 -volume vol16  -aggregate data2 -size 462m -security-style ntfs -snapshot-policy none -junction-path /vol16
+vserver cifs share create -vserver svm1 -share-name vol16 -path /vol16
+vol create -vserver svm1 -volume vol34  -aggregate data2 -size 385m -security-style ntfs -snapshot-policy none -junction-path /vol34
+vserver cifs share create -vserver svm1 -share-name vol34 -path /vol34
+vol create -vserver svm1 -volume vol55  -aggregate data2 -size 24m -security-style ntfs -snapshot-policy none -junction-path /vol55
+vserver cifs share create -vserver svm1 -share-name vol55 -path /vol55
+vol create -vserver svm1 -volume vol0_b -aggregate data2 -size 335m -security-style ntfs -snapshot-policy none -junction-path /vol0_b
+vserver cifs share create -vserver svm1 -share-name vol0_b -path /vol0_b
+vol create -vserver svm1 -volume vol28  -aggregate data2 -size 318m -security-style ntfs -snapshot-policy none -junction-path /vol28
+vserver cifs share create -vserver svm1 -share-name vol28 -path /vol28
+vol create -vserver svm1 -volume vol20  -aggregate data2 -size 173m -security-style ntfs -snapshot-policy none -junction-path /vol20
+vserver cifs share create -vserver svm1 -share-name vol20 -path /vol20
+vol create -vserver svm1 -volume vol27  -aggregate data2 -size 173m -security-style ntfs -snapshot-policy none -junction-path /vol27
+vserver cifs share create -vserver svm1 -share-name vol27 -path /vol27
+vol create -vserver svm1 -volume vol52  -aggregate data2 -size 151m -security-style ntfs -snapshot-policy none -junction-path /vol52
+vserver cifs share create -vserver svm1 -share-name vol52 -path /vol52
+vol create -vserver svm1 -volume vol14  -aggregate data2 -size 75m -security-style ntfs -snapshot-policy none -junction-path /vol14
+vserver cifs share create -vserver svm1 -share-name vol14 -path /vol14
+vol create -vserver svm1 -volume vol53  -aggregate data2 -size 63m -security-style ntfs -snapshot-policy none -junction-path /vol53
+vserver cifs share create -vserver svm1 -share-name vol53 -path /vol53
+vol create -vserver svm1 -volume vol57  -aggregate data2 -size 76m -security-style ntfs -snapshot-policy none -junction-path /vol57
+vserver cifs share create -vserver svm1 -share-name vol57 -path /vol57
+vol create -vserver svm1 -volume vol10  -aggregate data2 -size 62m -security-style ntfs -snapshot-policy none -junction-path /vol10
+vserver cifs share create -vserver svm1 -share-name vol10 -path /vol10
+vol create -vserver svm1 -volume vol19  -aggregate data2 -size 48m -security-style ntfs -snapshot-policy none -junction-path /vol19
+vserver cifs share create -vserver svm1 -share-name vol19 -path /vol19
+vol create -vserver svm1 -volume vol25  -aggregate data2 -size 47m -security-style ntfs -snapshot-policy none -junction-path /vol25
+vserver cifs share create -vserver svm1 -share-name vol25 -path /vol25
+vol create -vserver svm1 -volume vol54  -aggregate data2 -size 46m -security-style ntfs -snapshot-policy none -junction-path /vol54
+vserver cifs share create -vserver svm1 -share-name vol54 -path /vol54
+vol create -vserver svm1 -volume vol24  -aggregate data2 -size 35m -security-style ntfs -snapshot-policy none -junction-path /vol24
+vserver cifs share create -vserver svm1 -share-name vol24 -path /vol24
+vol create -vserver svm1 -volume vol30  -aggregate data2 -size 23m -security-style ntfs -snapshot-policy none -junction-path /vol30
+vserver cifs share create -vserver svm1 -share-name vol30 -path /vol30
+vol create -vserver svm1 -volume vol49  -aggregate data2 -size 28m -security-style ntfs -snapshot-policy none -junction-path /vol49
+vserver cifs share create -vserver svm1 -share-name vol49 -path /vol49
+vol create -vserver svm1 -volume vol13  -aggregate data2 -size 27m -security-style ntfs -snapshot-policy none -junction-path /vol13
+vserver cifs share create -vserver svm1 -share-name vol13 -path /vol13
+vol create -vserver svm1 -volume vol11  -aggregate data2 -size 22m -security-style ntfs -snapshot-policy none -junction-path /vol11
+vserver cifs share create -vserver svm1 -share-name vol11 -path /vol11
+vol create -vserver svm1 -volume vol51  -aggregate data2 -size 22m -security-style ntfs -snapshot-policy none -junction-path /vol51
+vserver cifs share create -vserver svm1 -share-name vol51 -path /vol51
+vol create -vserver svm1 -volume vol15  -aggregate data2 -size 20m -security-style ntfs -snapshot-policy none -junction-path /vol15
+vserver cifs share create -vserver svm1 -share-name vol15 -path /vol15
+vol create -vserver svm1 -volume vol31  -aggregate data2 -size 20m -security-style ntfs -snapshot-policy none -junction-path /vol31
+vserver cifs share create -vserver svm1 -share-name vol31 -path /vol31
+vol create -vserver svm1 -volume vol45  -aggregate data2 -size 20m -security-style ntfs -snapshot-policy none -junction-path /vol45
+vserver cifs share create -vserver svm1 -share-name vol45 -path /vol45
+vol create -vserver svm1 -volume vol58  -aggregate data2 -size 20m -security-style ntfs -snapshot-policy none -junction-path /vol58
+vserver cifs share create -vserver svm1 -share-name vol58 -path /vol58
+vol create -vserver svm1 -volume vol35  -aggregate data2 -size 20m -security-style ntfs -snapshot-policy none -junction-path /vol35
+vserver cifs share create -vserver svm1 -share-name vol35 -path /vol35
+vol create -vserver svm1 -volume vol8   -aggregate data2 -size 20m -security-style ntfs -snapshot-policy none -junction-path /vol8
+vserver cifs share create -vserver svm1 -share-name vol8 -path /vol8
+vol create -vserver svm1 -volume vol46  -aggregate data2 -size 20m -security-style ntfs -snapshot-policy none -junction-path /vol46
+vserver cifs share create -vserver svm1 -share-name vol46 -path /vol46
+vol create -vserver svm1 -volume vol33  -aggregate data2 -size 20m -security-style ntfs -snapshot-policy none -junction-path /vol33
+vserver cifs share create -vserver svm1 -share-name vol33 -path /vol33
+vol create -vserver svm1 -volume vol48  -aggregate data2 -size 20m -security-style ntfs -snapshot-policy none -junction-path /vol48
+vserver cifs share create -vserver svm1 -share-name vol48 -path /vol48
+vol create -vserver svm1 -volume vol36  -aggregate data2 -size 20m -security-style ntfs -snapshot-policy none -junction-path /vol36
+vserver cifs share create -vserver svm1 -share-name vol36 -path /vol36
+vol create -vserver svm1 -volume vol37  -aggregate data2 -size 20m -security-style ntfs -snapshot-policy none -junction-path /vol37
+vserver cifs share create -vserver svm1 -share-name vol37 -path /vol37
+vol create -vserver svm1 -volume volfj13 -aggregate data2 -size 20m -security-style ntfs -snapshot-policy none -junction-path /volfj13
+vserver cifs share create -vserver svm1 -share-name volfj13 -path /volfj13
+
+set -confirmations on
